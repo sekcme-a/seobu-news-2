@@ -156,7 +156,7 @@ export default function CommentsPage() {
                             </h2>
                             <div className="bg-gray-50 group-hover:bg-white px-4 py-2 rounded-xl border border-gray-100 transition-colors">
                               <p className="text-gray-700 text-sm md:text-[15px] line-clamp-2 leading-relaxed font-medium">
-                                "{item.content}"
+                                {`"${item.content}"`}
                               </p>
                             </div>
                           </div>
