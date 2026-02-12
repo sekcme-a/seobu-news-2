@@ -1,57 +1,51 @@
 import { createServerSupabaseClient } from "@/utils/supabase/server";
 import {
-  getCategory,
   getParentCategory,
   getChildCategories,
 } from "@/utils/supabase/getCategories";
-import Image from "next/image";
 import ArticleSmallThumbnail from "@/components/thumbnails/AritlceSmallThumbnail";
 
 export default async function HeadlineList({ categorySlug }) {
   const supabase = await createServerSupabaseClient();
   const parentCategory = await getParentCategory(categorySlug);
-
   const categories = await getChildCategories(parentCategory.slug);
-  const slugs = categories.map((item) => item.slug);
-  console.log(slugs);
+  const slugs = categories?.map((item) => item.slug) || [];
+
   let articles = [];
   try {
     if (slugs.length === 0) {
-      const { data, error } = await supabase.rpc(
-        "get_random_articles_within_days",
-        { days: 15, count: 7 },
-      );
-      articles = data;
+      const { data } = await supabase.rpc("get_random_articles_within_days", {
+        days: 15,
+        count: 7,
+      });
+      articles = data || [];
     } else {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("article_categories")
         .select("articles(title, thumbnail_image, images_bodo, id)")
         .in("category_slug", slugs)
-        .eq("is_main", true);
-
-      if (error) throw new Error(error.message);
-      if (!data) throw new Error("기사가 없습니다");
-      articles = data.map((item) => item.articles);
+        .eq("is_main", true)
+        .limit(7);
+      articles = data?.map((item) => item.articles) || [];
     }
 
     return (
-      <>
-        <p className="font-bold text-xl">
-          {slugs.length === 0 ? "다른기사 보기" : `${parentCategory.name} 기사`}
-        </p>
-        <ul>
+      <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <h3 className="font-black text-lg text-gray-900 mb-6 flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+          {slugs.length === 0 ? "인기 기사" : `${parentCategory.name} 핫이슈`}
+        </h3>
+        <ul className="flex flex-col gap-1">
           {articles.map((article, index) => (
-            <ArticleSmallThumbnail article={article} key={index} />
+            <ArticleSmallThumbnail
+              article={article}
+              key={article.id || index}
+            />
           ))}
         </ul>
-      </>
+      </div>
     );
   } catch (err) {
-    console.error(err);
-    return (
-      <p className="text-center text-red-500">
-        뉴스를 불러오는 중 오류가 발생했습니다.
-      </p>
-    );
+    return null;
   }
 }

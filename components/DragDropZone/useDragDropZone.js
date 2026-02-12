@@ -4,7 +4,7 @@ import imageCompression from "browser-image-compression";
 
 export const useDragDropZone = ({ initialFiles = [], onChange, maxMB = 1 }) => {
   const [files, setFiles] = useState(
-    initialFiles.map((file) => ({ ...file, id: uuidv4() }))
+    initialFiles.map((file) => ({ ...file, id: uuidv4() })),
   );
   const [statusText, setStatusText] = useState("");
 
@@ -27,7 +27,7 @@ export const useDragDropZone = ({ initialFiles = [], onChange, maxMB = 1 }) => {
   const onDrop = useCallback(
     async (acceptedFiles) => {
       setStatusText(
-        `이미지를 받아오는 중입니다...\n${maxMB}MB 이상의 이미지는 자동으로 압축됩니다.`
+        `이미지를 받아오는 중입니다...\n${maxMB}MB 이상의 이미지는 자동으로 압축됩니다.`,
       );
       const newFiles = await Promise.all(
         acceptedFiles.map(async (file, index) => {
@@ -38,14 +38,14 @@ export const useDragDropZone = ({ initialFiles = [], onChange, maxMB = 1 }) => {
             preview: URL.createObjectURL(compressedFile),
             id: uuidv4(),
           };
-        })
+        }),
       );
       setStatusText("");
       const updated = [...files, ...newFiles];
       setFiles(updated);
       onChange?.(updated);
     },
-    [files, onChange, maxMB]
+    [files, onChange, maxMB],
   );
 
   const onRemove = useCallback(
@@ -54,7 +54,7 @@ export const useDragDropZone = ({ initialFiles = [], onChange, maxMB = 1 }) => {
       setFiles(updated);
       onChange?.(updated);
     },
-    [files, onChange]
+    [files, onChange],
   );
 
   const onDragEnd = useCallback(
@@ -66,7 +66,7 @@ export const useDragDropZone = ({ initialFiles = [], onChange, maxMB = 1 }) => {
       setFiles(updated);
       onChange?.(updated);
     },
-    [files, onChange]
+    [files, onChange],
   );
 
   return { files, onDrop, onRemove, onDragEnd, statusText };

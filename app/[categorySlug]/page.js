@@ -12,9 +12,7 @@ import AdBanner from "../zz_components/AdBanner";
 
 export async function generateMetadata({ params }) {
   const { categorySlug } = params;
-
   const category = categories.find((cat) => cat.slug === categorySlug);
-
   return createMetadata({
     title: category?.name,
     description: category?.description,
@@ -25,46 +23,75 @@ export async function generateMetadata({ params }) {
 export default function CategoryPage({ params }) {
   const { categorySlug } = params;
   return (
-    <>
-      <main className="pt-14 md:pt-20  md:mx-[4vw] lg:mx-[7vw] mx-[12px]">
+    <div className="bg-white min-h-screen">
+      <main className="max-w-[1280px] mx-auto pt-14 md:pt-24 px-4 lg:px-6">
         <Navbar categorySlug={categorySlug} />
 
-        <div className="md:flex gap-x-10 mt-7">
-          <div className="md:w-3/4">
+        <div className="flex flex-col xl:flex-row gap-12 mt-10">
+          {/* 메인 리스트 영역 (75%) */}
+          <div className="w-full xl:w-[72%]">
             <Suspense fallback={<SkeletonCategory variant="Headline" />}>
               <Headline categorySlug={categorySlug} />
             </Suspense>
-            <Suspense fallback={<SkeletonCategory variant="ArticleList" />}>
-              <ArticleList categorySlug={categorySlug} />
-            </Suspense>
+
+            <div className="mt-12">
+              <Suspense fallback={<SkeletonCategory variant="ArticleList" />}>
+                <ArticleList categorySlug={categorySlug} />
+              </Suspense>
+            </div>
           </div>
-          <div className="md:w-1/4">
+
+          {/* 사이드바 영역 (25%) */}
+          <aside className="w-full xl:w-[28%] flex flex-col gap-8">
             <Suspense fallback={<SkeletonCategory variant="HeadlineList" />}>
               <HeadlineList categorySlug={categorySlug} />
             </Suspense>
 
-            <AdBanner ad_type="category_right_middle_1" className="my-5" />
-            <AdBanner ad_type="category_right_middle_2" className="my-5" />
-            <div className="w-full h-8 border-t-[1px] border-white" />
-            <Suspense fallback={<></>}>
-              <RightBodyOne
-                rightCategorySlug="opinion"
-                rightCategoryName="행사/축제"
-                limit={5}
+            <div className="space-y-4">
+              <AdBanner
+                ad_type="category_right_middle_1"
+                className="rounded-lg overflow-hidden border border-gray-100"
               />
-            </Suspense>
-            <AdBanner ad_type="category_right_bottom_1" className="my-5" />
-            <AdBanner ad_type="category_right_bottom_2" className="my-5" />
-          </div>
+              <AdBanner
+                ad_type="category_right_middle_2"
+                className="rounded-lg overflow-hidden border border-gray-100"
+              />
+            </div>
+
+            <div className="border-t border-gray-100 pt-8">
+              <Suspense
+                fallback={
+                  <div className="h-40 bg-gray-50 rounded-xl animate-pulse" />
+                }
+              >
+                <RightBodyOne
+                  rightCategorySlug="opinion"
+                  rightCategoryName="오피니언"
+                  limit={5}
+                />
+              </Suspense>
+            </div>
+
+            <div className="space-y-4">
+              <AdBanner
+                ad_type="category_right_bottom_1"
+                className="rounded-lg overflow-hidden border border-gray-100"
+              />
+              <AdBanner
+                ad_type="category_right_bottom_2"
+                className="rounded-lg overflow-hidden border border-gray-100"
+              />
+            </div>
+          </aside>
         </div>
 
         <AdBanner
           ad_type="category_bottom_full"
           width="100%"
-          className="mt-10"
+          className="mt-20 mb-10 rounded-xl overflow-hidden shadow-sm"
         />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

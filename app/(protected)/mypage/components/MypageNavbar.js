@@ -7,35 +7,43 @@ export default function MyPageNavbar({ selectedMenu }) {
     { name: "북마크", link: "/mypage/bookmarks" },
     { name: "프로필", link: "/mypage/profile" },
   ];
+
   return (
-    <div className="flex  py-3 justify-between items-center border-b border-white">
-      <div className="flex items-center">
-        <Link
-          href="/"
-          title="서부뉴스 홈으로 이동"
-          className="relative w-[100px] h-[33px] md:w-[150px] md:h-[50px] block"
-        >
+    <div className="flex py-6 justify-between items-center border-b-2 border-gray-900 mb-10">
+      <div className="flex items-center gap-4">
+        <Link href="/" className="relative w-[120px] h-[40px] block">
           <Image
-            src="/images/logo_white.png"
-            alt="서부뉴스"
+            src="/images/logo.png" // 블랙 로고 사용
+            alt="홈으로"
             fill
-            style={{ objectFit: "contain" }}
+            className="object-contain"
             priority
           />
         </Link>
-        <h1 className="text-xl font-bold">마이페이지</h1>
+        <div className="w-[1px] h-4 bg-gray-300 mx-2 hidden md:block" />
+        <h1 className="text-xl font-black text-gray-900 hidden md:block">
+          마이페이지
+        </h1>
       </div>
-      <ul className="flex gap-x-7 pr-3">
-        {item.map((menu) => (
-          <li
-            key={menu.name}
-            className={`cursor-pointer hover:text-white ${
-              selectedMenu === menu.name ? "font-bold" : "text-gray-300"
-            }`}
-          >
-            <Link href={menu.link}>{menu.name}</Link>
-          </li>
-        ))}
+
+      <ul className="flex gap-x-6 md:gap-x-8">
+        {item.map((menu) => {
+          const isActive = selectedMenu === menu.name;
+          return (
+            <li key={menu.name}>
+              <Link
+                href={menu.link}
+                className={`text-[15px] md:text-base transition-all pb-1 ${
+                  isActive
+                    ? "font-black text-blue-600 border-b-2 border-blue-600"
+                    : "text-gray-400 font-medium hover:text-gray-600"
+                }`}
+              >
+                {menu.name}
+              </Link>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

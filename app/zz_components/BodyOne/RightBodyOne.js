@@ -4,56 +4,51 @@ import Link from "next/link";
 export default async function RightBodyOne({
   rightCategorySlug,
   rightCategoryName,
-  limit = 10,
+  limit = 8,
 }) {
   const supabase = await createServerSupabaseClient();
 
   try {
-    const { data, error } = await supabase
+    const { data: articles, error } = await supabase
       .from("articles")
       .select(
         `
-      id,
-      title,
-      article_categories!inner(category_slug)
-    `
+        id, title,
+        article_categories!inner(category_slug)
+      `,
       )
-      .eq("article_categories.category_slug", "opinion")
+      .eq("article_categories.category_slug", rightCategorySlug || "opinion")
       .order("created_at", { ascending: false })
       .limit(limit);
 
-    console.log(data);
-    if (error) throw new Error(error.message);
-    if (!data) throw new Error("No articles found");
-
-    const articles = data;
-    // const articles = data?.map((item) => item.articles) || [];
+    if (error || !articles) return null;
 
     return (
-      <div>
-        <h5 className="font-bold text-xl italic"># {rightCategoryName}</h5>
-        <ul>
-          {articles.map((article, index) => (
-            <li
-              key={article.id}
-              className={`py-5 hover-effect ${
-                index !== articles.length - 1 ? "border-b-[1px]" : ""
-              } border-[#3d3d3d]`}
-            >
-              <article>
-                <Link href={`article/${article.id}`} aria-label="기사로 이동">
-                  <h4 className="text-md font-semibold line-clamp-2 text-[#e3e3e3]">
-                    {article.title}
-                  </h4>
-                </Link>
-              </article>
+      <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
+        <h5 className="font-black text-xl text-gray-900 mb-6 flex items-center gap-2">
+          <span className="w-1 h-5 bg-blue-600 rounded-full"></span>
+          {rightCategoryName}
+        </h5>
+        <ul className="space-y-4">
+          {articles.map((article) => (
+            <li key={article.id} className="group">
+              <Link href={`/article/${article.id}`} className="block">
+                <h4 className="text-[15px] font-semibold text-gray-700 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug">
+                  {article.title}
+                </h4>
+              </Link>
             </li>
           ))}
         </ul>
+        <Link
+          href={`/${rightCategorySlug || "opinion"}`}
+          className="mt-6 block text-center text-xs font-bold text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          전체보기 +
+        </Link>
       </div>
     );
   } catch (err) {
-    console.error(err);
-    return <p className="text-center text-gray-500">표시할 뉴스가 없습니다.</p>;
+    return null;
   }
 }

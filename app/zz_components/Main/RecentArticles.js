@@ -1,51 +1,53 @@
 import { createServerSupabaseClient } from "@/utils/supabase/server";
 import Link from "next/link";
-import Image from "next/image";
 import AdBanner from "../AdBanner";
 
 export default async function RecentArticles() {
   const supabase = await createServerSupabaseClient();
 
-  // 1. main_1_right 광고 데이터 조회
-  const { data: adData, error: adError } = await supabase
+  const { data: adData } = await supabase
     .from("advertisements")
     .select("image_url, target_url, ad_type")
     .eq("ad_type", "main_top_right")
     .maybeSingle();
-  const mainRightAd = adData;
 
   try {
-    // 2. 뉴스 기사 데이터 조회 (기존 로직)
     const { data: recentArticles, error } = await supabase
       .from("articles")
-      .select("id, title")
+      .select("id, title, created_at")
       .order("created_at", { ascending: false })
-      .limit(mainRightAd ? 5 : 7);
+      .limit(adData ? 6 : 8);
 
-    if (error) throw new Error(`최근 뉴스 조회 실패: ${error.message}`);
+    if (error) throw error;
 
     return (
-      <ul>
-        {recentArticles.map((article, index) => (
-          <li
-            key={index}
-            className={`py-5 md:py-4 hover-effect ${
-              index !== recentArticles.length - 1 ? "border-b-[1px]" : ""
-            } border-[#3d3d3d]`}
-          >
-            <Link href={`/article/${article.id}`} aria-label="기사로 이동">
-              <span className="font-semibold text-lg line-clamp-2">
-                {article.title}
-              </span>
-            </Link>
-          </li>
-        ))}
-        {/* 이곳에 광고 추가 */}
-        {mainRightAd && <AdBanner data={mainRightAd} />}
-      </ul>
+      <div className="flex flex-col gap-5">
+        <ul className="divide-y divide-gray-50">
+          {recentArticles.map((article, index) => (
+            <li key={article.id} className="py-3 first:pt-0 group">
+              <Link href={`/article/${article.id}`} className="flex gap-3">
+                <span
+                  className={`text-lg font-black ${index < 3 ? "text-blue-600" : "text-gray-300"}`}
+                >
+                  {index + 1}
+                </span>
+                <span className="text-[15px] font-medium text-gray-700 group-hover:text-black line-clamp-2 leading-snug">
+                  {article.title}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        {adData && (
+          <div className="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+            <AdBanner data={adData} />
+          </div>
+        )}
+      </div>
     );
   } catch (err) {
-    console.error(err);
-    return <p className="text-center text-gray-500">표시할 뉴스가 없습니다.</p>;
+    return (
+      <p className="text-gray-400 text-sm">최신 뉴스를 가져올 수 없습니다.</p>
+    );
   }
 }

@@ -34,11 +34,9 @@ export default function BookmarksPage() {
       if (!user) return;
 
       setLoading(true);
-
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
 
-      // bookmarks 테이블에서 데이터를 가져오되, articles 테이블을 조인하여 필요한 정보 선택
       const { data, count, error } = await supabase
         .from("bookmarks")
         .select(
@@ -85,92 +83,124 @@ export default function BookmarksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#1f1f1f] text-white">
-      <div className="md:mx-[4vw] lg:mx-[7vw] pt-10 pb-20">
-        <div className="lg:mx-32">
+    <div className="min-h-screen bg-white text-gray-900">
+      <div className="max-w-[1280px] mx-auto px-4 md:px-10 pt-10 pb-20">
+        <div className="lg:mx-20 xl:mx-32">
           {/* 네비게이션 바 */}
           <MyPageNavbar selectedMenu="북마크" />
 
-          <div className="mt-8">
-            <h1 className="text-2xl font-bold mb-6 px-2">
-              북마크한 기사 ({totalCount})
-            </h1>
+          <div className="mt-12">
+            <div className="flex items-end justify-between mb-8 border-l-4 border-gray-900 pl-4">
+              <h1 className="text-2xl font-black italic tracking-tighter">
+                북마크 한 기사
+              </h1>
+              <span className="text-gray-400 text-sm font-bold uppercase">
+                총 <b className="text-blue-600">{totalCount}</b>건
+              </span>
+            </div>
 
             {loading ? (
               // 로딩 스켈레톤
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {[...Array(3)].map((_, i) => (
                   <div
                     key={i}
-                    className="bg-[#2a2a2a] h-40 rounded-lg animate-pulse"
+                    className="bg-gray-50 h-48 rounded-[2rem] animate-pulse border border-gray-100"
                   ></div>
                 ))}
               </div>
             ) : bookmarks.length === 0 ? (
               // 데이터 없음
-              <div className="text-center py-20 text-gray-400 bg-[#2a2a2a] rounded-lg">
-                북마크한 기사가 없습니다.
+              <div className="text-center py-24 bg-gray-50 rounded-[2rem] border border-dashed border-gray-200">
+                <p className="text-gray-400 font-medium">
+                  아직 북마크한 기사가 없습니다.
+                </p>
+                <Link
+                  href="/"
+                  className="mt-4 inline-block text-blue-600 font-bold hover:underline underline-offset-4"
+                >
+                  흥미로운 기사 찾아보기 →
+                </Link>
               </div>
             ) : (
               // 북마크 리스트
-              <div className="space-y-4">
+              <div className="grid grid-cols-1 gap-6">
                 {bookmarks.map((item) => {
                   const article = item.articles;
-                  if (!article) return null; // 기사가 삭제된 경우 방어 코드
+                  if (!article) return null;
 
                   return (
                     <div
                       key={item.id}
-                      className="group bg-[#2a2a2a] hover:bg-[#333333] transition-colors rounded-lg overflow-hidden border border-[#3a3a3a] shadow-sm"
+                      className="group bg-white hover:bg-gray-50 transition-all duration-300 rounded-[2rem] border border-gray-100 shadow-sm hover:shadow-xl overflow-hidden"
                     >
                       <Link
                         href={`/article/${article.id}`}
-                        className="flex flex-col md:flex-row"
+                        className="flex flex-col md:flex-row h-full"
                       >
                         {/* 썸네일 이미지 영역 */}
-                        <div className="w-full md:w-48 h-48 md:h-auto flex-shrink-0 overflow-hidden relative bg-black">
-                          {article.thumbnail_image ? (
+                        <div className="w-full md:w-48 h-48 md:h-auto relative bg-gray-100 shrink-0 overflow-hidden">
+                          {article.thumbnail_image ||
+                          article.images_bodo?.[0] ? (
                             <img
-                              src={article.thumbnail_image}
+                              src={
+                                article.thumbnail_image ||
+                                article.images_bodo?.[0]
+                              }
                               alt={article.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                             />
                           ) : (
-                            // 이미지가 없을 때 보여줄 placeholder
-                            <div className="w-full h-full flex items-center justify-center text-gray-600 bg-[#1a1a1a]">
-                              <span className="text-xs">No Image</span>
+                            <div className="w-full h-full flex items-center justify-center text-gray-300 font-black text-xs uppercase italic">
+                              No Preview
                             </div>
                           )}
                           {/* 카테고리 뱃지 */}
                           {article.category && (
-                            <span className="absolute top-2 left-2 bg-blue-600 text-white text-[10px] px-2 py-1 rounded shadow-md opacity-90">
-                              {article.category}
-                            </span>
+                            <div className="absolute top-5 left-5">
+                              <span className="bg-white/90 backdrop-blur-sm text-gray-900 text-[10px] font-black px-3 py-1.5 rounded-lg shadow-sm border border-gray-100 uppercase">
+                                {article.category}
+                              </span>
+                            </div>
                           )}
                         </div>
 
                         {/* 기사 내용 영역 */}
-                        <div className="p-5 flex flex-col justify-between flex-grow">
+                        <div className="px-8 py-4 flex flex-col justify-between ">
                           <div>
-                            <h2 className="text-lg md:text-xl font-bold mb-2 line-clamp-2 text-gray-100 group-hover:text-blue-400 transition-colors">
+                            <h2 className="text-lg md:text-xl font-black text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1 leading-[1.2] mb-4">
                               {article.title}
                             </h2>
-                            <p className="text-gray-400 text-sm line-clamp-2 mb-3">
+                            <p className="text-gray-500 text-[14px] md:text-[14px] line-clamp-2 leading-relaxed font-medium">
                               {htmlToPlainString(article.content) ||
-                                "내용 미리보기가 없습니다."}
+                                "본문 미리보기가 제공되지 않는 콘텐츠입니다."}
                             </p>
                           </div>
 
-                          <div className="flex justify-between items-end border-t border-[#3a3a3a] pt-3 mt-2">
-                            <div className="text-xs text-gray-500">
-                              <span className="mr-2">
+                          <div className="flex justify-between items-center  border-t border-gray-50 mt-3">
+                            <div className="flex items-center gap-3 text-xs font-bold text-gray-400">
+                              <span className="text-gray-900">
                                 {article.author || "편집부"}
                               </span>
+                              <span className="w-1 h-1 bg-gray-200 rounded-full" />
                               <span>{formatDate(article.created_at)}</span>
                             </div>
-                            <span className="text-xs text-blue-400 font-medium">
-                              기사 보러가기 →
-                            </span>
+                            <div className="hidden md:flex  items-center gap-1 text-sm font-black text-blue-600">
+                              <span>자세히 보기</span>
+                              <svg
+                                className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M13 7l5 5m0 0l-5 5m5-5H6"
+                                />
+                              </svg>
+                            </div>
                           </div>
                         </div>
                       </Link>
@@ -180,26 +210,38 @@ export default function BookmarksPage() {
               </div>
             )}
 
-            {/* 페이지네이션 (댓글 페이지와 동일) */}
+            {/* 페이지네이션 */}
             {!loading && totalCount > 0 && (
-              <div className="flex justify-center items-center mt-10 space-x-2">
+              <div className="flex justify-center items-center mt-16 space-x-2">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-md text-sm bg-[#2a2a2a] hover:bg-[#3a3a3a] disabled:opacity-50 disabled:cursor-not-allowed border border-[#3a3a3a]"
+                  className="p-3 rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-20 transition-all cursor-pointer"
                 >
-                  이전
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
                 </button>
 
-                <div className="flex space-x-1">
+                <div className="flex gap-2">
                   {[...Array(totalPages)].map((_, i) => (
                     <button
                       key={i + 1}
                       onClick={() => handlePageChange(i + 1)}
-                      className={`w-8 h-8 rounded-md text-sm flex items-center justify-center transition-colors ${
+                      className={`w-7 h-7 rounded-2xl text-sm font-black transition-all cursor-pointer ${
                         currentPage === i + 1
-                          ? "bg-blue-600 text-white font-bold"
-                          : "text-gray-400 hover:bg-[#2a2a2a]"
+                          ? "bg-gray-900 text-white shadow-xl shadow-gray-200 scale-110"
+                          : "text-gray-400 hover:bg-gray-100"
                       }`}
                     >
                       {i + 1}
@@ -210,9 +252,21 @@ export default function BookmarksPage() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1.5 rounded-md text-sm bg-[#2a2a2a] hover:bg-[#3a3a3a] disabled:opacity-50 disabled:cursor-not-allowed border border-[#3a3a3a]"
+                  className="p-3 rounded-2xl bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-20 transition-all cursor-pointer"
                 >
-                  다음
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={3}
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
                 </button>
               </div>
             )}

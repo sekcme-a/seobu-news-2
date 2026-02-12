@@ -15,9 +15,12 @@ export default async function MoreArticles({ articleId }) {
 
     if (catErr) throw new Error(catErr.message);
 
+    if (!category || category.length === 0) {
+      return null;
+    }
     const { data, error } = await supabase.rpc(
       "get_random_article_last_month",
-      { category_slug: category[0].category_slug, days: 30, count: 6 }
+      { category_slug: category[0]?.category_slug, days: 30, count: 6 },
     );
 
     if (error) throw new Error(error.message);

@@ -9,60 +9,45 @@ export default async function Headline({ categorySlug }) {
   try {
     const { data, error } = await supabase
       .from("article_categories")
-      .select(
-        "articles(title, thumbnail_image, images_bodo, content, id, images_bodo)",
-      )
+      .select("articles(title, thumbnail_image, images_bodo, content, id)")
       .eq("category_slug", categorySlug)
       .eq("is_main", true)
       .maybeSingle();
 
-    if (error) throw new Error(error.message);
-    if (!data) throw new Error("기사가 없습니다");
+    if (error || !data) return null;
 
     const plainContent = htmlToPlainString(data.articles.content);
     const article = { ...data.articles, content: plainContent };
 
     return (
-      <Link href={`article/${article.id}`}>
-        <article className="grid md:grid-cols-2 gap-x-4 w-full hover-effect">
-          <div className="">
-            <h3 className="font-bold text-3xl leading-snug line-clamp-3">
+      <Link href={`/article/${article.id}`} className="group">
+        <article className="grid md:grid-cols-5 gap-8 items-center bg-gray-50 p-6 md:p-8 rounded-3xl border border-gray-100 transition-all hover:bg-gray-100/50">
+          <div className="md:col-span-3 order-2 md:order-1">
+            <h3 className="font-extrabold text-2xl md:text-3xl text-gray-900 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2">
               {article.title}
             </h3>
-            <span className="text-sm text-[#999] line-clamp-4 leading-relaxed mt-3">
+            <p className="text-gray-500 text-[15px] md:text-base leading-relaxed mt-4 line-clamp-3">
               {article.content}
-            </span>
+            </p>
           </div>
-          <div className="relative w-full h-64 rounded-lg overflow-hidden mt-5 md:mt-0">
-            <Image
-              src={
-                article.thumbnail_image
-                  ? article.thumbnail_image
-                  : article.title?.includes("덕암") &&
-                      article.title?.includes("칼럼")
-                    ? "/images/kyunsik.png"
-                    : (article.images_bodo?.[0] ?? "/images/og_logo.png")
-              }
-              alt={article.title}
-              fill
-              objectFit={
-                article.title?.includes("덕암") &&
-                article.title?.includes("칼럼")
-                  ? "contain"
-                  : "cover"
-              }
-              style={{ backgroundColor: "black" }}
-            />
+          <div className="md:col-span-2 order-1 md:order-2">
+            <div className="relative w-full aspect-[4/3] rounded-2xl overflow-hidden shadow-sm">
+              <Image
+                src={
+                  article.thumbnail_image ??
+                  article.images_bodo?.[0] ??
+                  "/images/og_logo.png"
+                }
+                alt={article.title}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </div>
           </div>
         </article>
       </Link>
     );
   } catch (err) {
-    console.error(err);
-    return (
-      <p className="text-center text-red-500">
-        뉴스를 불러오는 중 오류가 발생했습니다.
-      </p>
-    );
+    return null;
   }
 }

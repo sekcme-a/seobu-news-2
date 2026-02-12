@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <>
       <Header hasH1 />
-      <main className="pt-14 md:pt-20  md:mx-[4vw] lg:mx-[7vw] mx-[12px]">
+      <main className="pt-14 md:pt-20  md:mx-[4vw] lg:mx-[7vw] mx-[12px] ">
         <DateToday />
         <Main />
 

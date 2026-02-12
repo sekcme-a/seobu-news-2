@@ -3,9 +3,9 @@ import Link from "next/link";
 
 export default function ArticleThumbnail({ article }) {
   return (
-    <li className="py-5 md:py-8 border-b-[1px] border-[#3d3d3d]">
+    <li className="py-5 md:py-8 border-b-[1px] border-[#9a9a9a]">
       <Link href={`/article/${article.id}`} aria-label="기사로 이동">
-        <article className="hover-effect flex gap-x-4 md:gap-x-8 items-center">
+        <article className="flex gap-x-4 md:gap-x-8 items-center">
           <div className="w-2/5 md:w-1/5 relative  h-24 rounded-lg overflow-hidden">
             <Image
               src={
@@ -28,10 +28,10 @@ export default function ArticleThumbnail({ article }) {
             />
           </div>
           <div className="w-3/5 md:w-4/5">
-            <span className="font-semibold text-xl line-clamp-2">
+            <span className="font-semibold text-xl line-clamp-2 ">
               {article.title}
             </span>
-            <p className="text-sm leading-relaxed mt-2 text-[#999] line-clamp-2">
+            <p className="text-sm leading-relaxed mt-2 text-[#444] line-clamp-2">
               {article.content}
             </p>
           </div>

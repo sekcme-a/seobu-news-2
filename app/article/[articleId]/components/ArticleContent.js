@@ -45,7 +45,7 @@ export default function ArticleContent({ article }) {
         <div className="relative w-full max-w-xl aspect-video">
           <Image
             src={article.thumbnail_image ?? "/images/logo.png"}
-            alt={article.title ?? "투데이태백 로고"}
+            alt={article.title ?? "서부뉴스 로고"}
             fill
             className="object-cover "
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

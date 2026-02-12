@@ -156,80 +156,60 @@ export default function SideNavbar({ categoriess, onClick }) {
       <button
         onClick={() => {
           onClick();
-          setTimeout(() => {
-            setIsOpen(true);
-          }, 200);
+          setTimeout(() => setIsOpen(true), 100);
         }}
-        className="ml-[10px] cursor-pointer"
+        className="p-2 text-gray-900 hover:bg-gray-100 rounded-full transition-colors"
       >
-        <MenuRoundedIcon style={{ color: "white", fontSize: "28px" }} />
+        <MenuRoundedIcon style={{ fontSize: "30px" }} />
       </button>
 
       {isOpen && (
         <>
-          {/* 검은색 배경, 50% 투명 */}
           <div
-            className="fixed inset-0 bg-black opacity-50 z-40 transition-opacity duration-300"
+            className="fixed inset-0 bg-black/40 z-[60] backdrop-blur-sm"
             onClick={closeSidebar}
           ></div>
 
-          {/* 사이드 메뉴 */}
           <div
             ref={sideNavRef}
-            className="fixed top-0 right-0 w-64 md:w-80 h-full bg-white 
-            shadow-xl transform transition-transform duration-300 ease-in-out 
-            z-50 translate-x-full p-6
-            overflow-y-scroll"
-            onClick={(e) => e.stopPropagation()}
+            className="fixed top-0 right-0 w-[280px] md:w-[350px] h-screen bg-white shadow-2xl z-[70] translate-x-full transition-transform duration-300 ease-out flex flex-col"
           >
-            <div className="flex justify-end mb-8">
+            {/* 헤더 섹션 */}
+            <div className="flex justify-between items-center p-6 border-b">
+              <span className="font-black text-xl tracking-tighter">
+                CATEGORY
+              </span>
               <button
                 onClick={closeSidebar}
-                className="text-gray-500 hover:text-gray-900 p-1 rounded-full hover:bg-gray-100 transition duration-150"
-                aria-label="Close sidebar"
+                className="p-1 hover:bg-gray-100 rounded-full"
               >
-                <CloseRoundedIcon style={{ fontSize: "24px" }} />
+                <CloseRoundedIcon />
               </button>
             </div>
 
-            <h2 className="text-2xl font-extrabold text-gray-800 border-b pb-4 mb-6">
-              서부뉴스
-            </h2>
+            {/* 본문 네비게이션 */}
+            <nav className="flex-1 overflow-y-auto p-4">
+              {/* 로딩/에러 처리는 유지 */}
+              <ul className="space-y-1 ">
+                {categories.map((category) => (
+                  <CategoryItem key={category.id} category={category} />
+                ))}
 
-            <nav className="overflow-y-auto max-h-[calc(100vh-150px)]">
-              {error ? (
-                <div className="text-center py-8 text-red-500">
-                  <p>⚠️ 데이터 로딩 실패: {error}</p>
-                </div>
-              ) : isLoading ? (
-                <div className="text-center py-8 text-gray-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500 mx-auto mb-2"></div>
-                  <p>카테고리 로딩 중...</p>
-                </div>
-              ) : categories.length === 0 ? (
-                <p className="text-gray-500">등록된 카테고리가 없습니다.</p>
-              ) : (
-                <ul>
-                  {categories.map((category) => (
-                    <CategoryItem key={category.id} category={category} />
-                  ))}
-
-                  <li className="mb-1">
-                    <div className="flex-grow p-3 rounded-lg text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition duration-150 font-medium">
-                      <Link href="/article/pdf" onClick={closeSidebar}>
-                        <div className="flex items-center justify-between">
-                          PDF 지면 보기
-                        </div>
-                      </Link>
-                    </div>
-                  </li>
-                </ul>
-              )}
+                <li className="mt-4 pt-4 border-t border-gray-100">
+                  <Link
+                    href="/article/pdf"
+                    onClick={closeSidebar}
+                    className="flex items-center p-3 text-red-600 font-bold hover:bg-red-50 rounded-lg"
+                  >
+                    PDF 지면 보기
+                  </Link>
+                </li>
+              </ul>
             </nav>
 
-            {/* <div className=" bottom-0 left-0 right-0 p-6 border-t text-sm text-gray-400">
-              <p>서부뉴스</p>
-            </div> */}
+            <div className="p-6 bg-gray-50 text-xs text-gray-400">
+              © 2026 뉴스 홈페이지명. All rights reserved.
+            </div>
           </div>
         </>
       )}

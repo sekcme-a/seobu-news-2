@@ -6,126 +6,70 @@ export default async function RightBodyTwo({ categorySlug }) {
   const supabase = await createServerSupabaseClient();
 
   try {
-    const { data, error } = await supabase
+    const { data: imageArticles } = await supabase
       .from("articles")
       .select(
-        `
-      id,
-      title,
-      thumbnail_image,
-      images_bodo,
-      article_categories!inner(category_slug)
-    `,
+        `id, title, thumbnail_image, images_bodo, article_categories!inner(category_slug)`,
       )
       .eq("article_categories.category_slug", categorySlug)
       .order("created_at", { ascending: false })
       .range(4, 5);
 
-    if (error) throw new Error(error.message);
-    if (!data) throw new Error("No article found");
-
-    const imageArticles = data || [];
-
-    const { data: arts, error: artsErr } = await supabase
+    const { data: textArticles } = await supabase
       .from("articles")
-      .select(
-        `
-      id,
-      title,
-      article_categories!inner(category_slug)
-    `,
-      )
+      .select(`id, title, article_categories!inner(category_slug)`)
       .eq("article_categories.category_slug", categorySlug)
       .order("created_at", { ascending: false })
       .range(6, 9);
 
-    if (artsErr) throw new Error(artsErr.message);
-    if (!arts) throw new Error("No article found");
+    if (!imageArticles?.length) return null;
 
-    const textArticles = arts || [];
-    console.log(textArticles);
     return (
-      <section className="md:flex w-full gap-x-4">
-        <div className="md:flex-1">
-          <article className="hover-effect">
-            <Link
-              href={`article/${imageArticles[0]?.id}`}
-              aria-label="기사로 이동"
-            >
-              <div className="relative w-full h-36 rounded-md overflow-hidden">
-                <Image
-                  src={
-                    imageArticles[0]?.thumbnail_image ??
-                    imageArticles[0]?.images_bodo?.[0] ??
-                    "/images/og_logo.png"
-                  }
-                  alt={imageArticles[0]?.title}
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-              <h3 className="mt-2 text-lg line-clamp-2 font-semibold py-2">
-                {imageArticles[0]?.title}
-              </h3>
-            </Link>
-          </article>
-          <ul className="mt-2">
-            {textArticles.slice(0, 2).map((article, index) => (
-              <li
-                key={article.id}
-                className={`hover-effect py-3 font-bold border-t-[1px] border-[#3d3d3d]`}
-              >
-                <article>
-                  <Link href={`article/${article.id}`} aria-label="기사로 이동">
-                    <span className="text-lg">{article.title}</span>
-                  </Link>
-                </article>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="md:flex-1 mt-10 md:mt-0">
-          <article className="hover-effect">
-            <Link
-              href={`article/${imageArticles[1]?.id}`}
-              aria-label="기사로 이동"
-            >
-              <div className="relative w-full h-36 rounded-md overflow-hidden">
-                <Image
-                  src={
-                    imageArticles[1]?.thumbnail_image ??
-                    imageArticles[1]?.images_bodo?.[0] ??
-                    "/images/og_logo.png"
-                  }
-                  alt={imageArticles[1]?.title}
-                  fill
-                  objectFit="cover"
-                />
-              </div>
-              <h3 className="mt-2 text-lg line-clamp-2 font-semibold py-2">
-                {imageArticles[1]?.title}
-              </h3>
-            </Link>
-          </article>
-          <ul className="mt-2">
-            {textArticles.slice(2, 4).map((article) => (
-              <li
-                key={article.id}
-                className="hover-effect py-3 font-bold border-t-[1px] border-[#3d3d3d]"
-              >
-                <article>
-                  <Link href={`article/${article.id}`} aria-label="기사로 이동">
-                    <span className="text-lg">{article.title}</span>
-                  </Link>
-                </article>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      <div className="grid grid-cols-2 gap-x-6">
+        {[0, 1].map((colIdx) => (
+          <div key={colIdx} className="flex flex-col">
+            {imageArticles[colIdx] && (
+              <article className="group mb-6">
+                <Link href={`/article/${imageArticles[colIdx].id}`}>
+                  <div className="relative w-full h-32 rounded-xl overflow-hidden bg-gray-50 mb-3 border border-gray-100">
+                    <Image
+                      src={
+                        imageArticles[colIdx].thumbnail_image ??
+                        imageArticles[colIdx].images_bodo?.[0] ??
+                        "/images/og_logo.png"
+                      }
+                      alt={imageArticles[colIdx].title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <h4 className="text-[15px] font-bold text-gray-800 group-hover:text-blue-600 line-clamp-2 leading-snug">
+                    {imageArticles[colIdx].title}
+                  </h4>
+                </Link>
+              </article>
+            )}
+            <ul className="space-y-3">
+              {textArticles
+                ?.slice(colIdx * 2, (colIdx + 1) * 2)
+                .map((article) => (
+                  <li
+                    key={article.id}
+                    className="group border-t border-gray-50 pt-3"
+                  >
+                    <Link href={`/article/${article.id}`}>
+                      <h5 className="text-[14px] font-semibold text-gray-600 group-hover:text-black line-clamp-2 leading-snug transition-colors">
+                        {article.title}
+                      </h5>
+                    </Link>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        ))}
+      </div>
     );
   } catch (err) {
-    console.log(err);
-    return <p className="text-center text-gray-500">표시할 뉴스가 없습니다.</p>;
+    return null;
   }
 }

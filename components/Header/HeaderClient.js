@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import SideNavbar from "./SideNavbar";
-import NavList from "./NavList";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function HeaderClient({
@@ -23,123 +21,91 @@ export default function HeaderClient({
   useEffect(() => {
     const handleScroll = () => {
       if (scrolled) return;
-      setIsScrolled(window.scrollY > 10);
+      setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [scrolled]);
 
-  const borderClasses = `
-    ${
-      isScrolled
-        ? "bg-gray-500 h-[1px] w-full"
-        : "bg-white h-[3px] w-full md:w-[92vw] lg:w-[86vw]"
-    } 
-    transition-all duration-300
-  `;
-
   const handleSearch = () => {
-    if (searchValue.trimStart().length === 0) return;
-    if (searchValue.trimStart().length < 2) {
-      alert("검색어는 2글자 이상 입력해주세요.");
+    if (!searchValue.trim()) return;
+    if (searchValue.trim().length < 2) {
+      alert("검색어를 2자 이상 입력해주세요.");
       return;
     }
-    router.push(`article/search?input=${searchValue}`);
-  };
-
-  // ⭐️ 인증 상태에 따라 라우팅을 처리하는 함수
-  const handlePersonIconClick = () => {
-    // 시니어급: 명확한 변수명과 조건부 로직
-    const targetPath = isSignedIn ? "/mypage/profile" : "/auth/login";
-    router.push(targetPath);
+    router.push(`/article/search?input=${searchValue}`);
+    setShowSearch(false);
   };
 
   return (
-    <header className="fixed z-20 w-full bg-[#1f1f1f]">
-      {/* 상단 헤더 */}
-      <div className="h-14 md:h-20 flex justify-center items-center relative z-30">
-        <div
-          className="w-full md:w-[92vw] lg:w-[86vw] flex justify-between items-center
-      px-2 md:px-0"
-        >
-          {children}
+    <header
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        isScrolled ? "bg-white/90 " : "bg-white border-b border-gray-100"
+      }`}
+    >
+      <div className="max-w-[1280px] mx-auto h-16 md:h-20 flex justify-between items-center px-4 md:px-6">
+        {/* 왼쪽: 로고 및 메인메뉴 (children) */}
+        <div className="flex items-center">{children}</div>
 
-          <ul className="flex items-center">
+        {/* 오른쪽: 유틸리티 아이콘 */}
+        <nav>
+          <ul className="flex items-center gap-2 md:gap-4">
             <li>
               <button
-                onClick={handlePersonIconClick} // ⭐️ 클릭 이벤트 핸들러 연결
-                aria-label={
-                  isSignedIn ? "프로필 페이지로 이동" : "로그인 페이지로 이동"
+                onClick={() => setShowSearch(!showSearch)}
+                className="p-2 cursor-pointer text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="검색창 열기"
+              >
+                <SearchRoundedIcon fontSize="medium" />
+              </button>
+            </li>
+            <li>
+              <button
+                onClick={() =>
+                  router.push(isSignedIn ? "/mypage/profile" : "/auth/login")
                 }
-                className="cursor-pointer" // 버튼에 커서 스타일 적용
+                className="p-2 text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                aria-label="내 계정"
               >
-                <PersonOutlineRoundedIcon
-                  style={{ color: "white", fontSize: "28px" }}
-                />
+                <PersonOutlineRoundedIcon fontSize="medium" />
               </button>
             </li>
-            <li>
-              <button
-                onClick={() => setShowSearch((prev) => !prev)}
-                aria-label="검색"
-                className="cursor-pointer"
-              >
-                <SearchRoundedIcon
-                  style={{
-                    color: "white",
-                    fontSize: "28px",
-                    marginLeft: "10px",
-                  }}
-                />
-              </button>
-            </li>
-            <li>
+            <li className="ml-1 border-l pl-2 border-gray-200">
               <SideNavbar
                 categoriess={categories}
                 onClick={() => setShowSearch(false)}
               />
             </li>
           </ul>
-        </div>
+        </nav>
       </div>
 
-      <hr className={`${borderClasses} m-auto p-0 border-none z-20`} />
-
-      {/* 검색창을 navbar 아래에서 슬라이드 */}
+      {/* 검색창 영역 - 화이트 테마 최적화 */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="bg-[#1f1f1f] flex justify-center items-center 
-            relative z-30"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            className="absolute top-full left-0 w-full bg-white border-b border-gray-200 shadow-xl py-6 px-4"
           >
-            <div className="w-full md:px-[4vw] lg:px-[7vw] flex items-center gap-2 py-3 px-4 -z-0 bg-[#1f1f1f] ">
+            <div className="max-w-3xl mx-auto flex items-center gap-3">
               <input
+                autoFocus
                 type="text"
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                placeholder="검색어를 입력하세요."
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    handleSearch();
-                  }
-                }}
-                className="flex-1 bg-[#3a3a3a] text-white placeholder-gray-400 px-4 py-2 rounded-lg outline-none focus:ring-2 focus:ring-gray-400"
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="어떤 소식을 찾으시나요?"
+                className="flex-1 bg-gray-100 border-none px-6 py-3 rounded-full text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 outline-none"
               />
               <button
-                className="bg-white text-black font-semibold px-4 py-1 rounded-lg hover:bg-gray-200 cursor-pointer"
                 onClick={handleSearch}
+                className="bg-gray-900 cursor-pointer text-white px-6 py-3 rounded-full font-medium hover:bg-black transition-colors"
               >
                 검색
               </button>
             </div>
-            <div
-              className="absolute top-0  opacity-40 left-0 w-screen h-screen bg-black -z-10"
-              onClick={() => setShowSearch(false)}
-            />
           </motion.div>
         )}
       </AnimatePresence>

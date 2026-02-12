@@ -36,7 +36,7 @@ export default async function RootLayout({ children }) {
       </head>
       <body
         className={[
-          `bg-[#1f1f1f] text-white vsc-initialized ${geistSans.variable} ${geistMono.variable}`,
+          `vsc-initialized ${geistSans.variable} ${geistMono.variable}`,
         ]}
       >
         <Script

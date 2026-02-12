@@ -5,34 +5,21 @@ import Link from "next/link";
 export default async function Headline() {
   const supabase = await createServerSupabaseClient();
 
-  // article_categories 테이블을 기준으로 쿼리를 시작합니다.
   const { data: articles, error } = await supabase
     .from("article_categories")
-    // 1. article_id를 통해 articles 테이블의 모든(*) 컬럼을 조인하여 가져옵니다.
-    //    PostgREST/Supabase는 Foreign Key 관계를 기반으로 이 조인을 수행합니다.
-    .select("articles(title, thumbnail_image, id, images_bodo)")
-    // 2. category_slug가 'general'인 항목을 필터링합니다.
+    .select("articles(title, thumbnail_image, id, images_bodo, content)")
     .eq("category_slug", "general")
-    // 3. is_main이 true인 항목을 필터링합니다.
     .eq("is_main", true);
 
-  if (error) {
-    console.error("Error fetching headline article:", error);
-    return <div>데이터를 불러오는 중 오류가 발생했습니다.</div>;
-  }
+  if (error) return <div className="py-10 text-gray-400">데이터 로딩 오류</div>;
 
-  // 데이터 구조:
-  // categoryArticles는 [{ articles: { id: ..., title: ..., ... } }] 형태입니다.
   const articleData = articles?.[0]?.articles;
-
-  if (!articleData) {
-    return <div>메인 기사를 찾을 수 없습니다.</div>;
-  }
+  if (!articleData) return null;
 
   return (
-    <Link href={`article/${articleData.id}`} aria-label="기사로 이동">
-      <article>
-        <div className="relative w-full h-64 md:h-96 md:rounded-xl overflow-hidden">
+    <Link href={`/article/${articleData.id}`} className="group block">
+      <article className="overflow-hidden">
+        <div className="relative w-full h-[250px] md:h-[450px] rounded-2xl overflow-hidden bg-gray-100 shadow-sm">
           <Image
             src={
               articleData.thumbnail_image ??
@@ -40,19 +27,21 @@ export default async function Headline() {
               "/images/og_logo.png"
             }
             alt={articleData.title}
-            // 2. width, height 대신 fill 속성을 사용합니다.
             fill
-            // 3. object-fit으로 이미지의 크기 조정 방식을 제어합니다.
-            //    - cover: 비율을 유지하며 부모 영역을 모두 덮음 (일부가 잘릴 수 있음)
-            //    - contain: 비율을 유지하며 부모 영역에 맞춤 (여백이 생길 수 있음)
-            style={{ objectFit: "contain" }}
-            // 4. (선택적) Tailwind CSS 스타일로 object-fit을 적용할 수도 있습니다.
-            // className="object-cover"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            priority
           />
+          {/* 이미지 위 오버레이 (선택사항: 뉴스 가독성 향상) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
-        <h2 className="text-xl md:text-3xl font-bold mt-3 leading-snug md:mt-5 hover-effect line-clamp-2">
-          {articleData.title}
-        </h2>
+        <div className="mt-6">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-[1.3] group-hover:text-blue-600 transition-colors line-clamp-2">
+            {articleData.title}
+          </h2>
+          <p className="mt-3 text-gray-500 line-clamp-2 text-sm md:text-base leading-relaxed">
+            {articleData.content?.replace(/<[^>]*>?/gm, "").slice(0, 150)}...
+          </p>
+        </div>
       </article>
     </Link>
   );

@@ -5,103 +5,62 @@ import Link from "next/link";
 export default async function BodyArticles({ categorySlug }) {
   const supabase = await createServerSupabaseClient();
   try {
-    const { data: dataWithContent, error } = await supabase
+    const { data: articles, error } = await supabase
       .from("articles")
       .select(
         `
-      id,
-      title,
-      content,
-      article_categories!inner(category_slug)
-    `,
+        id, title, content, thumbnail_image, images_bodo,
+        article_categories!inner(category_slug)
+      `,
       )
       .eq("article_categories.category_slug", categorySlug)
       .order("created_at", { ascending: false })
-      .range(1, 2);
+      .range(1, 3);
 
-    if (error) throw new Error(error.message);
-    if (!dataWithContent) throw new Error("No articles found");
+    if (error || !articles?.length) return null;
 
-    const contentArticles = dataWithContent.map((item) => {
-      const plainContent = item.content
-        .replace(/<br\s*\/?>/gi, "\n") // <br>을 줄바꿈으로 변환
-        .replace(/<[^>]+>/g, "") // 모든 HTML 태그 제거
-        .replace(/\n\s*\n/g, "\n\n") // 연속 줄바꿈 정리
-        .trim();
-      return { ...item, content: plainContent };
-    });
-
-    const { data: dataWithImg, error: imgError } = await supabase
-      .from("articles")
-      .select(
-        `
-      id,
-      title,
-      thumbnail_image,
-      content,
-      images_bodo,
-      article_categories!inner(category_slug)
-    `,
-      )
-      .eq("article_categories.category_slug", categorySlug)
-      .order("created_at", { ascending: false })
-      .range(3, 3);
-    if (imgError) throw new Error(imgError.message);
-    if (!dataWithImg) throw new Error("No articles found");
-
-    const plainContent = dataWithImg[0]?.content
-      .replace(/<br\s*\/?>/gi, "\n") // <br>을 줄바꿈으로 변환
-      .replace(/<[^>]+>/g, "") // 모든 HTML 태그 제거
-      .replace(/\n\s*\n/g, "\n\n") // 연속 줄바꿈 정리
-      .trim();
-    const imgArticle = { ...dataWithImg[0], content: plainContent };
+    const formatContent = (content) => content.replace(/<[^>]+>/g, "").trim();
 
     return (
-      <div>
-        <ul>
-          {contentArticles.map((article) => (
-            <li key={article.id} className="mb-10 hover-effect">
-              <article>
-                <Link href={`article/${article.id}`} aria-label="기사로 이동">
-                  <h4 className="text-xl font-semibold mb-3 line-clamp-2">
+      <div className="divide-y divide-gray-100">
+        {articles.map((article, index) => {
+          const isLast = index === articles.length - 1;
+          return (
+            <article
+              key={article.id}
+              className={`${index === 0 ? "pb-6" : "py-6"} group`}
+            >
+              <Link href={`/article/${article.id}`} className="flex gap-4">
+                <div className="flex-1">
+                  <h4 className="text-[17px] font-bold text-gray-800 group-hover:text-blue-600 line-clamp-2 mb-2 transition-colors">
                     {article.title}
                   </h4>
-                  <p className="text-sm text-[#999] line-clamp-2">
-                    {article.content}
+                  <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                    {formatContent(article.content)}
                   </p>
-                </Link>
-              </article>
-            </li>
-          ))}
-          <li className="hover-effect">
-            <article>
-              <Link href={`article/${imgArticle.id}`} aria-label="기사로 이동">
-                <h4 className="text-xl font-semibold mb-2 line-clamp-2">
-                  {imgArticle.title}
-                </h4>
-                <p className="text-sm text-[#999] line-clamp-2 ">
-                  {imgArticle.content}
-                </p>
-                <div className="relative w-[30%] h-20 rounded-xl overflow-hidden mt-3">
-                  <Image
-                    src={
-                      imgArticle.thumbnail_image ??
-                      imgArticle.images_bodo?.[0] ??
-                      "/images/og_logo.png"
-                    }
-                    alt={imgArticle.title ?? "기사 이미지"}
-                    fill
-                    objectFit="cover"
-                  />
                 </div>
+                {/* 마지막 기사 혹은 이미지가 있는 경우 작은 썸네일 노출 */}
+                {(isLast || article.thumbnail_image) && (
+                  <div className="relative w-24 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-gray-50">
+                    <Image
+                      src={
+                        article.thumbnail_image ??
+                        article.images_bodo?.[0] ??
+                        "/images/og_logo.png"
+                      }
+                      alt={article.title}
+                      fill
+                      className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                  </div>
+                )}
               </Link>
             </article>
-          </li>
-        </ul>
+          );
+        })}
       </div>
     );
   } catch (err) {
-    console.error(err);
-    return <p className="text-center text-gray-500">표시할 뉴스가 없습니다.</p>;
+    return null;
   }
 }

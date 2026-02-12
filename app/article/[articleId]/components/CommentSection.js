@@ -4,12 +4,12 @@ import { useAuth } from "@/providers/AuthProvider";
 import { createBrowserSupabaseClient } from "@/utils/supabase/client";
 import { useState, useEffect, useCallback } from "react";
 
-/** 아이콘 컴포넌트들 (SVG) */
+/** 아이콘 컴포넌트들 (SVG - 라이트 테마용 굵기 조정) */
 const Icons = {
   Reply: () => (
     <svg
-      width="16"
-      height="16"
+      width="14"
+      height="14"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -21,8 +21,8 @@ const Icons = {
   ),
   Edit: () => (
     <svg
-      width="14"
-      height="14"
+      width="13"
+      height="13"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -34,8 +34,8 @@ const Icons = {
   ),
   Trash: () => (
     <svg
-      width="14"
-      height="14"
+      width="13"
+      height="13"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -47,8 +47,8 @@ const Icons = {
   ),
   ThumbsUp: ({ filled }) => (
     <svg
-      width="16"
-      height="16"
+      width="15"
+      height="15"
       fill={filled ? "currentColor" : "none"}
       stroke="currentColor"
       strokeWidth="2"
@@ -59,8 +59,8 @@ const Icons = {
   ),
   ThumbsDown: ({ filled }) => (
     <svg
-      width="16"
-      height="16"
+      width="15"
+      height="15"
       fill={filled ? "currentColor" : "none"}
       stroke="currentColor"
       strokeWidth="2"
@@ -71,8 +71,8 @@ const Icons = {
   ),
   Flag: () => (
     <svg
-      width="14"
-      height="14"
+      width="13"
+      height="13"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -93,20 +93,16 @@ const formatRelativeTime = (dateString) => {
   if (diffInMinutes < 60) return `${diffInMinutes}분 전`;
   const diffInHours = Math.floor(diffInMinutes / 60);
   if (diffInHours < 24) return `${diffInHours}시간 전`;
-  const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${diffInDays}일 전`;
   return past.toLocaleDateString();
 };
 
 export default function CommentSection({ articleId }) {
   const supabase = createBrowserSupabaseClient();
   const [comments, setComments] = useState([]);
-  // const [user, setUser] = useState(null);
   const { user, isLoading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
   const [newComment, setNewComment] = useState("");
 
-  // 평면 배열 -> 트리 구조 변환 함수 (currentUser를 인자로 받아 myVote 정확히 계산)
   const buildCommentTree = useCallback((flatComments, currentUser) => {
     const map = {};
     const roots = [];
@@ -140,100 +136,93 @@ export default function CommentSection({ articleId }) {
       const { data, error } = await supabase
         .from("comments")
         .select(
-          `
-        *,
-        profiles ( display_name, avatar_url ),
-        comment_votes ( user_id, vote_type )
-      `
+          `*, profiles ( display_name, avatar_url ), comment_votes ( user_id, vote_type )`,
         )
         .eq("article_id", articleId)
         .order("created_at", { ascending: true });
 
       if (!error && data) {
-        const commentTree = buildCommentTree(data, currentUser);
-        setComments(commentTree);
+        setComments(buildCommentTree(data, currentUser));
       }
       setLoading(false);
     },
-    [articleId, buildCommentTree, supabase]
+    [articleId, buildCommentTree, supabase],
   );
 
-  // 초기 데이터 로드
   useEffect(() => {
-    // const fetchData = async () => {
-    //   setLoading(true);
-    //   const {
-    //     data: { session },
-    //   } = await supabase.auth.getSession();
-    //   const currentUser = session?.user || null;
-    //   setUser(currentUser);
-    //   // 세션 정보를 바로 fetchComments에 전달하여 myVote가 누락되지 않게 함
-    //   await fetchComments(currentUser);
-    // };
-    // fetchData();
     if (!authLoading) fetchComments(user);
-  }, [articleId, authLoading, user]);
+  }, [articleId, authLoading, user, fetchComments]);
 
   const handleCreateComment = async (e) => {
     e.preventDefault();
     if (!newComment.trim() || !user) return;
-
-    const { error } = await supabase.from("comments").insert({
-      article_id: articleId,
-      user_id: user.id,
-      content: newComment,
-    });
-
+    const { error } = await supabase
+      .from("comments")
+      .insert({ article_id: articleId, user_id: user.id, content: newComment });
     if (!error) {
       setNewComment("");
       fetchComments(user);
     }
   };
 
-  const countChildren = (comment) => {
-    if (!comment.children || comment.children.length === 0) return 0;
-    return (
-      comment.children.length +
-      comment.children.reduce((acc, c) => acc + countChildren(c), 0)
-    );
-  };
+  const totalCount = comments.reduce((acc, c) => {
+    const countSub = (item) =>
+      1 +
+      (item.children?.reduce((subAcc, sub) => subAcc + countSub(sub), 0) || 0);
+    return acc + countSub(c);
+  }, 0);
 
   if (loading)
-    return <div className="p-4 text-gray-400">댓글을 불러오는 중...</div>;
+    return (
+      <div className="p-8 text-center text-gray-400 animate-pulse">
+        댓글을 불러오는 중...
+      </div>
+    );
 
   return (
-    <div className="w-full bg-[#1f1f1f] text-gray-200 mt-8 border-t-[1px] border-white">
-      <h3 className="text-xl font-bold text-white mb-6 mt-5">
-        댓글 {comments.reduce((acc, c) => acc + 1 + countChildren(c), 0)}
+    <div className="w-full bg-white mt-12 border-t-2 border-gray-900 pb-20">
+      <h3 className="text-[19px] font-black text-gray-900 mb-8 mt-8 flex items-center gap-2">
+        댓글 <span className="text-blue-600">{totalCount}</span>
       </h3>
 
       {user ? (
-        <form onSubmit={handleCreateComment} className="mb-6 flex gap-3">
-          <div className="flex-1 flex items-end gap-x-2">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 남겨보세요..."
-              className="flex-1 bg-[#2a2a2a] border border-gray-700 rounded-md p-3 text-white focus:outline-none focus:border-blue-500 transition-colors resize-none h-24"
-            />
+        <form
+          onSubmit={handleCreateComment}
+          className="mb-10 bg-gray-50 p-5 rounded-2xl border border-gray-100 shadow-sm"
+        >
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="비방이나 욕설은 삼가주세요. 여러분의 소중한 의견을 남겨주세요."
+            className="w-full bg-white border border-gray-200 rounded-xl p-4 text-[15px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all resize-none h-28"
+          />
+          <div className="flex justify-end mt-3">
             <button
               type="submit"
-              className="h-fit px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+              className="px-6 py-2.5 bg-gray-900 hover:bg-black text-white text-sm font-bold rounded-xl transition-all shadow-sm"
             >
-              등록
+              의견 등록하기
             </button>
           </div>
         </form>
       ) : (
-        <div className="mb-8 p-4 bg-[#2a2a2a] rounded text-center text-gray-400">
-          댓글을 작성하려면 로그인이 필요합니다.
+        <div className="mb-10 p-10 bg-gray-50 rounded-2xl border border-dashed border-gray-300 text-center">
+          <p className="text-gray-500 text-sm">
+            로그인 후 댓글 작성이 가능합니다.
+          </p>
+          <button className="mt-3 text-blue-600 font-bold text-sm hover:underline">
+            로그인 하러가기
+          </button>
         </div>
       )}
 
-      <div className="space-y-6">
+      <div className="space-y-2">
         {comments.length === 0 && (
-          <div className="text-gray-500 mt-20 text-center">
-            아직 등록된 댓글이 없습니다.
+          <div className="py-20 text-center flex flex-col items-center">
+            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+              <Icons.Reply />
+            </div>
+            <p className="text-gray-400 text-sm">첫 번째 의견을 남겨주세요.</p>
           </div>
         )}
         {comments.map((comment) => (
@@ -251,7 +240,14 @@ export default function CommentSection({ articleId }) {
   );
 }
 
-function CommentItem({ comment, user, supabase, refresh, articleId }) {
+function CommentItem({
+  comment,
+  user,
+  supabase,
+  refresh,
+  articleId,
+  isReply = false,
+}) {
   const [isReplying, setIsReplying] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [replyContent, setReplyContent] = useState("");
@@ -261,7 +257,6 @@ function CommentItem({ comment, user, supabase, refresh, articleId }) {
 
   const handleVote = async (type) => {
     if (!user) return alert("로그인이 필요합니다.");
-
     if (comment.myVote === type) {
       await supabase
         .from("comment_votes")
@@ -272,67 +267,14 @@ function CommentItem({ comment, user, supabase, refresh, articleId }) {
         .from("comment_votes")
         .upsert(
           { comment_id: comment.id, user_id: user.id, vote_type: type },
-          { onConflict: "comment_id, user_id" }
+          { onConflict: "comment_id, user_id" },
         );
     }
     refresh();
   };
-  // 댓글 신고
-
-  const handleReport = async () => {
-    if (!user) return alert("로그인이 필요합니다.");
-
-    const reason = prompt("신고 사유를 입력해주세요.");
-
-    if (reason) {
-      const { error } = await supabase.from("comment_reports").insert({
-        comment_id: comment.id,
-
-        user_id: user.id,
-
-        reason: reason,
-      });
-
-      if (!error) alert("신고가 접수되었습니다.");
-    }
-  };
-
-  const submitReply = async () => {
-    if (!replyContent.trim()) return;
-    const { error } = await supabase.from("comments").insert({
-      article_id: articleId,
-      user_id: user.id,
-      content: replyContent,
-      parent_id: comment.id,
-    });
-    if (!error) {
-      setIsReplying(false);
-      setReplyContent("");
-      refresh();
-    }
-  };
-
-  const submitEdit = async () => {
-    if (!editContent.trim() || editContent === comment.content) {
-      setIsEditing(false);
-      return;
-    }
-    const { error } = await supabase
-      .from("comments")
-      .update({
-        content: editContent,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", comment.id);
-
-    if (!error) {
-      setIsEditing(false);
-      refresh();
-    }
-  };
 
   const handleDelete = async () => {
-    if (confirm("정말 삭제하시겠습니까?")) {
+    if (confirm("댓글을 삭제하시겠습니까?")) {
       const { error } = await supabase
         .from("comments")
         .delete()
@@ -342,148 +284,167 @@ function CommentItem({ comment, user, supabase, refresh, articleId }) {
   };
 
   return (
-    <div className="flex gap-3 group">
-      <div className="flex-1">
-        <div className="flex justify-between items-start mb-1">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-gray-200 text-sm">
-              {comment.profiles?.display_name || "익명 사용자"}
+    <div
+      className={`py-6 ${isReply ? "pl-6 border-l-2 border-gray-100 ml-2" : "border-b border-gray-50"}`}
+    >
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-[14px] text-gray-900">
+            {comment.profiles?.display_name || "익명"}
+          </span>
+          <span className="text-[12px] text-gray-400">
+            {formatRelativeTime(comment.created_at)}
+          </span>
+          {comment.updated_at && (
+            <span className="text-[10px] text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded italic">
+              수정됨
             </span>
-            <span className="text-xs text-gray-500">
-              {formatRelativeTime(comment.created_at)}
-            </span>
-            {comment.updated_at && (
-              <span className="text-[10px] text-gray-400 bg-[#2a2a2a] px-1 rounded">
-                (수정됨)
-              </span>
-            )}
+          )}
+        </div>
+        <button
+          onClick={() => {
+            /* handleReport */
+          }}
+          className="text-gray-300 hover:text-red-500 transition-colors p-1"
+          title="신고"
+        >
+          <Icons.Flag />
+        </button>
+      </div>
+
+      <div className="mb-4">
+        {isEditing ? (
+          <div className="bg-gray-50 p-3 rounded-xl border border-gray-200">
+            <textarea
+              className="w-full bg-white border border-gray-100 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-100"
+              value={editContent}
+              onChange={(e) => setEditContent(e.target.value)}
+            />
+            <div className="flex gap-2 justify-end mt-2">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="text-xs px-3 py-1.5 text-gray-500 hover:bg-gray-100 rounded-lg"
+              >
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  await supabase
+                    .from("comments")
+                    .update({
+                      content: editContent,
+                      updated_at: new Date().toISOString(),
+                    })
+                    .eq("id", comment.id);
+                  setIsEditing(false);
+                  refresh();
+                }}
+                className="text-xs px-3 py-1.5 bg-blue-600 text-white rounded-lg font-bold"
+              >
+                수정 완료
+              </button>
+            </div>
           </div>
+        ) : (
+          <p className="text-[15px] text-gray-700 leading-relaxed whitespace-pre-wrap">
+            {comment.content}
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center gap-5">
+        <div className="flex items-center bg-gray-50 rounded-full px-3 py-1 gap-3">
           <button
-            className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            onClick={handleReport}
+            onClick={() => handleVote(1)}
+            className={`flex items-center gap-1.5 text-[12px] transition-colors ${comment.myVote === 1 ? "text-blue-600 font-bold" : "text-gray-500 hover:text-blue-600"}`}
           >
-            <Icons.Flag />
+            <Icons.ThumbsUp filled={comment.myVote === 1} />{" "}
+            <span>{comment.likes}</span>
+          </button>
+          <div className="w-[1px] h-3 bg-gray-200" />
+          <button
+            onClick={() => handleVote(-1)}
+            className={`flex items-center gap-1.5 text-[12px] transition-colors ${comment.myVote === -1 ? "text-red-600 font-bold" : "text-gray-500 hover:text-red-600"}`}
+          >
+            <Icons.ThumbsDown filled={comment.myVote === -1} />{" "}
+            <span>{comment.dislikes}</span>
           </button>
         </div>
 
-        <div className="text-white text-sm leading-relaxed mb-2">
-          {isEditing ? (
-            <div className="mt-2">
-              <textarea
-                className="w-full bg-[#2a2a2a] border border-gray-600 rounded p-2 text-white focus:outline-none mb-2"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-              />
-              <div className="flex gap-2 justify-end">
-                <button
-                  onClick={() => setIsEditing(false)}
-                  className="text-xs px-3 py-1 text-gray-400 hover:text-white"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={submitEdit}
-                  className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  수정 완료
-                </button>
-              </div>
-            </div>
-          ) : (
-            <p className="whitespace-pre-wrap text-white">{comment.content}</p>
-          )}
-        </div>
+        <button
+          onClick={() => setIsReplying(!isReplying)}
+          className="text-[12px] font-bold text-gray-500 hover:text-gray-900 flex items-center gap-1"
+        >
+          <Icons.Reply /> 답글달기
+        </button>
 
-        {!isEditing && (
-          <div className="flex items-center gap-4 text-xs text-gray-500">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => handleVote(1)}
-                className={`hover:text-blue-400 flex items-center gap-1 cursor-pointer ${
-                  comment.myVote === 1 ? "text-blue-400" : ""
-                }`}
-              >
-                <Icons.ThumbsUp filled={comment.myVote === 1} />
-                <span>{comment.likes}</span>
-              </button>
-              <button
-                onClick={() => handleVote(-1)}
-                className={`hover:text-red-400 flex items-center gap-1 ml-2 cursor-pointer ${
-                  comment.myVote === -1 ? "text-red-400" : ""
-                }`}
-              >
-                <Icons.ThumbsDown filled={comment.myVote === -1} />
-                <span>{comment.dislikes}</span>
-              </button>
-            </div>
+        {isMyComment && (
+          <div className="ml-auto flex gap-3">
             <button
-              onClick={() => setIsReplying(!isReplying)}
-              className="hover:text-white flex items-center gap-1 transition-colors cursor-pointer"
+              onClick={() => setIsEditing(true)}
+              className="text-[12px] text-gray-400 hover:text-blue-600 flex items-center gap-1"
             >
-              <Icons.Reply /> 답글
+              <Icons.Edit /> 수정
             </button>
-            {isMyComment && (
-              <>
-                <button
-                  onClick={() => setIsEditing(true)}
-                  className="hover:text-white flex items-center gap-1 ml-auto cursor-pointer"
-                >
-                  <Icons.Edit /> 수정
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="hover:text-red-400 flex items-center gap-1 cursor-pointer"
-                >
-                  <Icons.Trash /> 삭제
-                </button>
-              </>
-            )}
-          </div>
-        )}
-
-        {isReplying && (
-          <div className="mt-3 flex gap-3">
-            <div className="flex-1">
-              <textarea
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="답글을 입력하세요..."
-                className="w-full bg-[#2a2a2a] border border-gray-700 rounded p-2 text-white text-sm focus:outline-none focus:border-blue-500 h-20 resize-none"
-              />
-              <div className="flex justify-end gap-2 mt-2">
-                <button
-                  onClick={() => setIsReplying(false)}
-                  className="text-xs text-gray-400 hover:text-white"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={submitReply}
-                  className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded"
-                >
-                  답글 등록
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {comment.children && comment.children.length > 0 && (
-          <div className="mt-4 pl-4 border-l-2 border-[#333]">
-            {comment.children.map((child) => (
-              <div key={child.id} className="mt-4 first:mt-0">
-                <CommentItem
-                  comment={child}
-                  user={user}
-                  supabase={supabase}
-                  refresh={refresh}
-                  articleId={articleId}
-                />
-              </div>
-            ))}
+            <button
+              onClick={handleDelete}
+              className="text-[12px] text-gray-400 hover:text-red-600 flex items-center gap-1"
+            >
+              <Icons.Trash /> 삭제
+            </button>
           </div>
         )}
       </div>
+
+      {isReplying && (
+        <div className="mt-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+          <textarea
+            value={replyContent}
+            onChange={(e) => setReplyContent(e.target.value)}
+            placeholder="답글을 입력하세요..."
+            className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none h-20 resize-none"
+          />
+          <div className="flex justify-end gap-2 mt-3">
+            <button
+              onClick={() => setIsReplying(false)}
+              className="text-xs px-3 py-1.5 text-gray-500"
+            >
+              취소
+            </button>
+            <button
+              onClick={async () => {
+                if (!replyContent.trim()) return;
+                await supabase
+                  .from("comments")
+                  .insert({
+                    article_id: articleId,
+                    user_id: user.id,
+                    content: replyContent,
+                    parent_id: comment.id,
+                  });
+                setIsReplying(false);
+                setReplyContent("");
+                refresh();
+              }}
+              className="px-4 py-1.5 bg-gray-800 text-white text-xs font-bold rounded-lg"
+            >
+              답글 등록
+            </button>
+          </div>
+        </div>
+      )}
+
+      {comment.children?.map((child) => (
+        <CommentItem
+          key={child.id}
+          comment={child}
+          user={user}
+          supabase={supabase}
+          refresh={refresh}
+          articleId={articleId}
+          isReply={true}
+        />
+      ))}
     </div>
   );
 }

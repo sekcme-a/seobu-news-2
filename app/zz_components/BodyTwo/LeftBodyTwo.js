@@ -6,57 +6,36 @@ export default async function LeftBodyTwo({ categorySlug }) {
   const supabase = await createServerSupabaseClient();
 
   try {
-    const { data: fullData, error } = await supabase
+    const { data: fullData } = await supabase
       .from("articles")
       .select(
-        `
-      id,
-      title,
-       thumbnail_image, 
-       images_bodo,
-        content,
-      article_categories!inner(category_slug)
-    `,
+        `id, title, thumbnail_image, images_bodo, content, article_categories!inner(category_slug)`,
       )
       .eq("article_categories.category_slug", categorySlug)
       .order("created_at", { ascending: false })
       .limit(1);
 
-    if (error) throw new Error(error.message);
-    if (!fullData) throw new Error("No article found");
-
-    const plainContent = fullData[0]?.content
-      .replace(/<br\s*\/?>/gi, "\n") // <br>을 줄바꿈으로 변환
-      .replace(/<[^>]+>/g, "") // 모든 HTML 태그 제거
-      .replace(/\n\s*\n/g, "\n\n") // 연속 줄바꿈 정리
-      .trim();
-    const fullArticle = { ...fullData[0], content: plainContent };
-
-    const { data: datas, error: datasError } = await supabase
+    const { data: datas } = await supabase
       .from("articles")
-      .select(
-        `
-      id,
-      title,
-      article_categories!inner(category_slug)
-    `,
-      )
+      .select(`id, title, article_categories!inner(category_slug)`)
       .eq("article_categories.category_slug", categorySlug)
       .order("created_at", { ascending: false })
       .range(1, 3);
 
-    if (datasError) throw new Error(datasError.message);
-    if (!datas) throw new Error("No article found");
+    if (!fullData?.[0]) return null;
 
-    const articles = datas || [];
+    const fullArticle = fullData[0];
+    const plainContent = fullArticle.content.replace(/<[^>]+>/g, "").trim();
 
     return (
-      <section>
-        <article className="hover-effect">
-          <Link href={`article/${fullArticle.id}`} aria-label="기사로 이동">
-            <span className="text-xl font-semibold">{fullArticle.title}</span>
-            <div className="flex gap-x-4 items-center">
-              <div className="flex-1 relative h-36 w-full mt-4 rounded-md overflow-hidden">
+      <div className="flex flex-col h-full">
+        <article className="group">
+          <Link href={`/article/${fullArticle.id}`} className="block">
+            <h4 className="text-[22px] font-extrabold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight mb-4">
+              {fullArticle.title}
+            </h4>
+            <div className="flex gap-x-5 items-start">
+              <div className="flex-1 relative h-32 rounded-xl overflow-hidden bg-gray-50 border border-gray-100">
                 <Image
                   src={
                     fullArticle.thumbnail_image ??
@@ -65,39 +44,39 @@ export default async function LeftBodyTwo({ categorySlug }) {
                   }
                   alt={fullArticle.title}
                   fill
-                  objectFit="cover"
+                  className="object-cover group-hover:scale-105 transition-transform"
                 />
               </div>
-              <div className="flex-1">
-                <p className="mt-4 text-sm leading-relaxed line-clamp-6 text-[#999] ">
-                  {fullArticle.content}
+              <div className="flex-[1.2]">
+                <p className="text-[14.5px] leading-relaxed line-clamp-4 text-gray-500">
+                  {plainContent}
                 </p>
               </div>
             </div>
           </Link>
         </article>
-        <ul className="mt-4">
-          {articles.map((article, index) => (
+
+        <ul className="mt-8 space-y-4">
+          {datas?.map((article) => (
             <li
               key={article.id}
-              className={`py-4 hover-effect ${
-                index !== articles.length - 1 ? "border-b-[1px]" : ""
-              } border-[#3d3d3d]`}
+              className="group border-b border-gray-50 pb-4 last:border-0"
             >
-              <article>
-                <Link href={`article/${article.id}`} aria-label="기사로 이동">
-                  <h4 className="text-lg font-semibold line-clamp-1">
-                    {article.title}
-                  </h4>
-                </Link>
-              </article>
+              <Link
+                href={`/article/${article.id}`}
+                className="flex items-center gap-2"
+              >
+                <span className="w-1 h-1 bg-gray-300 rounded-full group-hover:bg-blue-600"></span>
+                <h5 className="text-[16px] font-medium text-gray-700 group-hover:text-black line-clamp-1 transition-colors">
+                  {article.title}
+                </h5>
+              </Link>
             </li>
           ))}
         </ul>
-      </section>
+      </div>
     );
   } catch (err) {
-    console.log(err);
-    return <p className="text-center text-gray-500">표시할 뉴스가 없습니다.</p>;
+    return null;
   }
 }

@@ -73,6 +73,7 @@ const NavBar = () => {
           <Image
             src="/images/logo.png"
             fill
+            // "https://lh3.googleusercontent.com/d/1sFPKnf0S_W7X6e7cwS0y0w_BTyF9DShT"
             alt="대생체 로고"
             objectFit="contain"
           />

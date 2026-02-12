@@ -52,6 +52,10 @@ span {
   aspect-ratio: 16 / 9;
 }
 
+button {
+  cursor: pointer;
+}
+
 /* ✅ md 이상일 때 (예: Tailwind 기준 md = 768px) */
 @media (min-width: 768px) {
   .ql-snow iframe {

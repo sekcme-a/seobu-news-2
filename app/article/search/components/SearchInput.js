@@ -17,23 +17,45 @@ export default function SearchInput({ input }) {
   };
 
   return (
-    <section className="w-full flex justify-center">
-      <div className="w-full lg:w-3/4 items-center mt-8 gap-x-5 flex  ">
+    <section className="w-full flex justify-center px-4">
+      <div className="w-full lg:w-2/3 flex items-center mt-10 relative group">
+        {/* 검색 돋보기 아이콘 (SVG) */}
+        <div className="absolute left-5 text-gray-400 group-focus-within:text-blue-500 transition-colors">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={3}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </div>
+
         <input
           type="text"
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="검색어를 입력하세요."
+          placeholder="궁금한 태백 소식을 검색해보세요."
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               handleSearch();
             }
           }}
-          className="flex-1 bg-[#3a3a3a] text-white placeholder-gray-400 px-4 py-3 rounded-3xl
-         outline-none focus:ring-2 focus:ring-gray-400"
+          className="w-full bg-white text-gray-900 placeholder-gray-400 pl-14 pr-28 py-4 rounded-[2rem]
+          border border-gray-300 shadow-xl shadow-gray-100/50 outline-none 
+          focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-lg font-medium"
         />
+
+        {/* 검색 버튼 (입력창 내부 우측 배치) */}
         <button
-          className="bg-white text-black font-semibold px-4 py-1 rounded-lg hover:bg-gray-200 cursor-pointer"
+          className="absolute right-2 bg-gray-900 text-white font-black px-6 py-2.5 rounded-[1.5rem] 
+          hover:bg-blue-600 transition-all cursor-pointer text-sm shadow-md"
           onClick={handleSearch}
         >
           검색

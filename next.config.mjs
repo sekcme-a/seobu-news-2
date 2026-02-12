@@ -11,6 +11,12 @@ const nextConfig = {
       },
       {
         protocol: "https",
+        hostname: "drive.google.com", // 👈 여기에 추출한 호스트 이름을 추가
+        port: "",
+        pathname: "/**", // 👈 Supabase Public Bucket 경로 패턴 추가 (선택 사항이지만 권장)
+      },
+      {
+        protocol: "https",
         hostname: "img.seoul.co.kr", // 👈 여기에 추출한 호스트 이름을 추가
         port: "",
         pathname: "/**", // 👈 Supabase Public Bucket 경로 패턴 추가 (선택 사항이지만 권장)

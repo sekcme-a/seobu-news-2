@@ -1,4 +1,3 @@
-import Skeleton from "@/components/Skeleton";
 import { Suspense } from "react";
 import BodyArticles from "./BodyArticles";
 import BodyFullArticle from "./BodyFullArticle";
@@ -6,8 +5,6 @@ import SkeletonsBodyOne from "./SkeletonsBodyOne";
 import RightBodyOne from "./RightBodyOne";
 import AdBanner from "../AdBanner";
 
-//leftCategorySlugs 2개
-//id 는 광고 위치 나누려고
 export default function BodyOne({
   leftCategorySlugs = [],
   rightCategorySlug,
@@ -15,11 +12,13 @@ export default function BodyOne({
   id,
 }) {
   return (
-    <>
-      <div className="lg:flex gap-x-7 mt-10">
-        <div className="w-full lg:w-3/4 border-t-[1px] border-[#e6e6e6] md:pt-10">
-          <div className="md:flex gap-x-7">
-            <div className="w-full md:w-1/2 mt-7 md:mt-0">
+    <section className="mt-16">
+      <div className="lg:flex gap-x-12">
+        {/* 왼쪽: 주요 카테고리 기사 영역 */}
+        <div className="w-full lg:w-[72%]">
+          {/* 첫 번째 카테고리 섹션 */}
+          <div className="md:flex gap-x-8 items-start border-t-2 border-gray-900 pt-8">
+            <div className="w-full md:w-1/2">
               <Suspense
                 fallback={<SkeletonsBodyOne variant="BodyFullArticle" />}
               >
@@ -32,14 +31,19 @@ export default function BodyOne({
               </Suspense>
             </div>
           </div>
-          <AdBanner
-            ad_type={`main_body_one_${id}_middle`}
-            width="100%"
-            aspectRatio="720/100"
-            className="my-4 md:my-10 aspect-[720/144] md:aspect-[720/100]"
-          />
-          <div className="md:flex gap-x-7 border-t-[1px] border-[#e6e6e6] md:pt-10 mt-10">
-            <div className="w-full md:w-1/2 mt-7 md:mt-0">
+
+          <div className="my-10">
+            <AdBanner
+              ad_type={`main_body_one_${id}_middle`}
+              width="100%"
+              aspectRatio="720/100"
+              className="rounded-lg overflow-hidden border border-gray-100"
+            />
+          </div>
+
+          {/* 두 번째 카테고리 섹션 */}
+          <div className="md:flex gap-x-8 items-start border-t border-gray-200 pt-8 mt-10">
+            <div className="w-full md:w-1/2">
               <Suspense
                 fallback={<SkeletonsBodyOne variant="BodyFullArticle" />}
               >
@@ -53,18 +57,24 @@ export default function BodyOne({
             </div>
           </div>
         </div>
-        <div className="w-full lg:w-1/4 border-t-[1px] border-[#e6e6e6] pt-6 mt-10 lg:mt-0">
-          <Suspense fallback={<SkeletonsBodyOne variant="Opinions" />}>
-            <RightBodyOne {...{ rightCategorySlug, rightCategoryName }} />
-          </Suspense>
 
-          <AdBanner
-            ad_type={`main_body_one_${id}_right`}
-            width="100%"
-            className="aspect-[16/9]"
-          />
+        {/* 오른쪽: 사이드바 영역 (오피니언 등) */}
+        <div className="w-full lg:w-[28%] mt-12 lg:mt-0">
+          <div className="sticky top-6">
+            <Suspense fallback={<SkeletonsBodyOne variant="Opinions" />}>
+              <RightBodyOne {...{ rightCategorySlug, rightCategoryName }} />
+            </Suspense>
+
+            <div className="mt-8">
+              <AdBanner
+                ad_type={`main_body_one_${id}_right`}
+                width="100%"
+                className="aspect-[16/9] rounded-xl overflow-hidden shadow-sm"
+              />
+            </div>
+          </div>
         </div>
       </div>
-    </>
+    </section>
   );
 }
