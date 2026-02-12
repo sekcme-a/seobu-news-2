@@ -54,7 +54,7 @@ export default function HeaderClient({
               <button
                 onClick={() => setShowSearch(!showSearch)}
                 className="p-2 cursor-pointer text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
-                aria-label="검색창 열기"
+                aria-label="검색창 열기 "
               >
                 <SearchRoundedIcon fontSize="medium" />
               </button>
