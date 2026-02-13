@@ -53,13 +53,18 @@ export default function Incheon({
     return text;
   };
 
+  const [isFetching, setIsFetching] = useState(false);
   const fetchArticles = async () => {
+    if (isFetching) return;
+    setIsFetching(true);
     setPosts([]);
     if (!settings.enabled) {
       navigator.clipboard.writeText("incheon_disabled");
+      setIsFetching(false);
       return;
     }
 
+    setIsFetching(true);
     const categoriesText = await fetchCategories();
 
     // 1. 날짜 배열 생성 (startDate ~ endDate)
@@ -142,6 +147,8 @@ export default function Incheon({
     } catch (error) {
       console.error(error);
       setLog((prev) => [...prev, "🚨 크롤링 중 치명적 오류 발생"]);
+    } finally {
+      setIsFetching(false);
     }
   };
 

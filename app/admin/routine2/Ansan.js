@@ -59,6 +59,7 @@ export default function Ansan({
     setPosts([]);
     if (!settings.enabled) {
       navigator.clipboard.writeText("ansan_disabled");
+      setIsFetching(false);
       return;
     }
 
@@ -296,6 +297,7 @@ export default function Ansan({
           sx={{ flex: 2, mt: 2, height: 100 }}
           fullWidth
           color="primary"
+          disabled={isFetching}
         >
           크롤링 실행
         </Button>

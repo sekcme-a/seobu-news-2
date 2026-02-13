@@ -51,13 +51,16 @@ export default function Siheung({
     return text;
   };
 
+  const [isFetching, setIsFetching] = useState(false);
   const fetchArticles = async () => {
+    if (isFetching) return;
     setPosts([]);
     if (!settings.enabled) {
       navigator.clipboard.writeText("siheung_disabled");
       return;
     }
 
+    setIsFetching(true);
     const categoriesText = await fetchCategories();
 
     // 1. 날짜 배열 생성 (startDate ~ endDate)
@@ -210,6 +213,8 @@ export default function Siheung({
           articleIds: [],
         },
       ]);
+    } finally {
+      setIsFetching(false);
     }
   };
 
