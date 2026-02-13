@@ -436,7 +436,7 @@ export default function Settings({
           size="large"
           sx={{ mt: 2 }}
           onClick={() => {
-            window.open("https://asinews.co.kr/icms/login.do", "_blank");
+            window.open("http://asinews.co.kr/icms/login.do", "_blank");
           }}
         >
           안산인터넷뉴스 열기
@@ -447,7 +447,7 @@ export default function Settings({
           size="large"
           sx={{ mt: 2 }}
           onClick={() => {
-            window.open("https://shinews.co.kr/icms/login.do", "_blank");
+            window.open("http://shinews.co.kr/icms/login.do", "_blank");
           }}
         >
           시흥인터넷뉴스 열기
@@ -458,7 +458,7 @@ export default function Settings({
           size="large"
           sx={{ mt: 2 }}
           onClick={() => {
-            window.open("https://icinews.co.kr/icms/login.do", "_blank");
+            window.open("http://icinews.co.kr/icms/login.do", "_blank");
           }}
         >
           인천시사뉴스 열기
