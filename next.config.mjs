@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    unoptimized: true,
+    minimumCacheTTL: 2678400, //31일
     // 💡 Next.js 13+ 앱 라우터 환경에서 권장되는 설정 방식
     remotePatterns: [
       {
