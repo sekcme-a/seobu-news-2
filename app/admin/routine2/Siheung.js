@@ -116,6 +116,7 @@ export default function Siheung({
       // 4. 후처리
       if (totalList.length === 0) {
         navigator.clipboard.writeText("null");
+        setAiText("null");
         setLog((prev) => [...prev, "⚠️ 수집된 데이터가 없습니다."]);
       } else {
         const titles = totalList.map((item) => item.title);

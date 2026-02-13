@@ -122,6 +122,7 @@ export default function Incheon({
 
       // 4. 후처리 (클립보드 복사 등)
       if (totalList.length === 0) {
+        setAiText("null");
         navigator.clipboard.writeText("null");
         setLog((prev) => [...prev, "⚠️ 수집된 데이터가 없습니다."]);
       } else {

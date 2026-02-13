@@ -158,6 +158,7 @@ export default function Settings({
   };
 
   const handleSaveAndStart = async () => {
+    navigator.clipboard.writeText("");
     // 저장하기 전 문자열을 다시 배열로 변환 (방어 코드 추가)
     const formattedAuthors = Object.keys(authors).reduce((acc, key) => {
       const value = authors[key];
