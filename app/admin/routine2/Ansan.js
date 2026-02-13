@@ -53,13 +53,16 @@ export default function Ansan({
     return text;
   };
 
+  const [isFetching, setIsFetching] = useState(false);
   const fetchArticles = async () => {
+    if (isFetching) return;
     setPosts([]);
     if (!settings.enabled) {
       navigator.clipboard.writeText("ansan_disabled");
       return;
     }
 
+    setIsFetching(true);
     const categoriesText = await fetchCategories();
 
     // 1. 날짜 배열 생성 (startDate ~ endDate)
@@ -141,6 +144,8 @@ export default function Ansan({
     } catch (error) {
       console.error(error);
       setLog((prev) => [...prev, "🚨 크롤링 중 치명적 오류 발생"]);
+    } finally {
+      setIsFetching(false);
     }
   };
 
