@@ -57,6 +57,7 @@ export default function Siheung({
     setPosts([]);
     if (!settings.enabled) {
       navigator.clipboard.writeText("siheung_disabled");
+      setIsFetching(false);
       return;
     }
 
@@ -137,6 +138,8 @@ export default function Siheung({
     } catch (error) {
       console.error(error);
       setLog((prev) => [...prev, "🚨 크롤링 중 치명적 오류 발생"]);
+    } finally {
+      setIsFetching(false);
     }
   };
 
@@ -213,8 +216,6 @@ export default function Siheung({
           articleIds: [],
         },
       ]);
-    } finally {
-      setIsFetching(false);
     }
   };
 
@@ -254,6 +255,7 @@ export default function Siheung({
           sx={{ flex: 2, mt: 2, height: 100 }}
           fullWidth
           color="primary"
+          disabled={isFetching}
         >
           크롤링 실행
         </Button>

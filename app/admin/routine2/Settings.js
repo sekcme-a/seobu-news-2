@@ -423,6 +423,51 @@ export default function Settings({
           variant="contained"
           fullWidth
           size="large"
+          sx={{ mt: 2 }}
+          onClick={() => {
+            window.open("https://chatgpt.com/", "_blank");
+          }}
+        >
+          챗지피티 열기
+        </Button>
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          sx={{ mt: 2 }}
+          onClick={() => {
+            window.open("https://asinews.co.kr/icms/login.do", "_blank");
+          }}
+        >
+          안산인터넷뉴스 열기
+        </Button>
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          sx={{ mt: 2 }}
+          onClick={() => {
+            window.open("https://shinews.co.kr/icms/login.do", "_blank");
+          }}
+        >
+          시흥인터넷뉴스 열기
+        </Button>
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          sx={{ mt: 2 }}
+          onClick={() => {
+            window.open("https://icinews.co.kr/icms/login.do", "_blank");
+          }}
+        >
+          인천시사뉴스 열기
+        </Button>
+
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
           sx={{ mt: 2, py: 1.5, fontWeight: "bold" }}
           onClick={handleSaveAndStart}
           disabled={Object.values(settings).some(
