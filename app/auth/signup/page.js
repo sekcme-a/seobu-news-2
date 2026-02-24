@@ -148,7 +148,7 @@ const SignUpPage = () => {
 
       <div style={{ textAlign: "center", fontSize: "14px" }}>
         <Link
-          href="/login"
+          href="/auth/login"
           style={{ color: "#007aff", textDecoration: "none" }}
         >
           로그인 페이지로

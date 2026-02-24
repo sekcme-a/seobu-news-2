@@ -126,7 +126,8 @@ export async function GET(request) {
 
         articles.push({
           number,
-          title: subTitle ? `[${subTitle}] ${title}` : title,
+          title: title,
+          // title: subTitle ? `[${subTitle}] ${title}` : title,
           date: dateStr,
           content,
           attachments: validImageFiles, // 이제 여기엔 무조건 이미지 URL만 들어감
