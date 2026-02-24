@@ -425,22 +425,12 @@ export default function Settings({
           size="large"
           sx={{ mt: 2 }}
           onClick={() => {
-            window.open("https://chatgpt.com/", "_blank");
+            window.open("http://icinews.co.kr/icms/login.do", "_blank");
           }}
         >
-          챗지피티 열기
+          인천시사뉴스 열기
         </Button>
-        <Button
-          variant="contained"
-          fullWidth
-          size="large"
-          sx={{ mt: 2 }}
-          onClick={() => {
-            window.open("http://asinews.co.kr/icms/login.do", "_blank");
-          }}
-        >
-          안산인터넷뉴스 열기
-        </Button>
+
         <Button
           variant="contained"
           fullWidth
@@ -452,16 +442,29 @@ export default function Settings({
         >
           시흥인터넷뉴스 열기
         </Button>
+
         <Button
           variant="contained"
           fullWidth
           size="large"
           sx={{ mt: 2 }}
           onClick={() => {
-            window.open("http://icinews.co.kr/icms/login.do", "_blank");
+            window.open("http://asinews.co.kr/icms/login.do", "_blank");
           }}
         >
-          인천시사뉴스 열기
+          안산인터넷뉴스 열기
+        </Button>
+
+        <Button
+          variant="contained"
+          fullWidth
+          size="large"
+          sx={{ mt: 2 }}
+          onClick={() => {
+            window.open("https://chatgpt.com/", "_blank");
+          }}
+        >
+          챗지피티 열기
         </Button>
 
         <Button
