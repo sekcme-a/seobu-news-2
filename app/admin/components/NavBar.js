@@ -84,6 +84,10 @@ const NavBar = () => {
 
       {MENU.map((group, groupIndex) => {
         if (!group.items) {
+          if (group.role && !userRole) return null;
+          if (group.role && userRole !== group.role) {
+            return null;
+          }
           return (
             <ListItemButton
               onClick={() => onClick(group.link)}
