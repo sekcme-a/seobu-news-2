@@ -78,7 +78,7 @@ export default function ArticleCleaner() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>시흥 기사 "담당 부서" 정보 변경 도구</h2>
+      <h2>{`시흥 기사 "담당 부서" 정보 변경 도구`}</h2>
       <button onClick={fetchAndProcessArticles} disabled={loading}>
         {loading ? "로딩 중..." : "시흥 기사 불러오기"}
       </button>
