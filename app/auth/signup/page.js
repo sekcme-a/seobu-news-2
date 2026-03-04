@@ -76,7 +76,7 @@ const SignUpPage = () => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}`, // 가입 후 리디렉션될 페이지 (선택 사항)
+          emailRedirectTo: `https://www.western-news.co.kr/auth/email-confirmed`, // 가입 후 리디렉션될 페이지 (선택 사항)
         },
       });
 

@@ -10,9 +10,9 @@ export default async function Header({ scrolled, hasH1 }) {
   const categories = await getCategories();
 
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const isSignedIn = !!session;
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isSignedIn = !!user;
 
   // 로고 섹션 분리 (가독성 및 SEO)
   const Logo = () => (
