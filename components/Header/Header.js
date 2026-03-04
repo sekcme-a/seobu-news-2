@@ -18,12 +18,12 @@ export default async function Header({ scrolled, hasH1 }) {
   const Logo = () => (
     <Link
       href="/"
-      title="홈으로 이동"
       className="relative w-[120px] h-[40px] md:w-[160px] md:h-[45px] block"
     >
+      <span class="sr-only">서부뉴스 - 내일의 중심이 되는 뉴스</span>
       <Image
         src="/images/logo.png" // 블랙 로고로 변경 권장
-        alt="뉴스 로고"
+        alt="서부뉴스 로고"
         fill
         className="object-contain"
         priority

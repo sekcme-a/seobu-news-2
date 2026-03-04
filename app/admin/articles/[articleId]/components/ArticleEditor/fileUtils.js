@@ -92,7 +92,6 @@ export const handleFileUpload = async ({
 
 export const handleFileDelete = async ({ supabase, article }) => {
   const images = extractImagePathsFromHtml(JSON.stringify(article));
-  console.log(images);
   const filePaths = article.files?.map((f) => f.path) || [];
   await deleteFiles([...images, ...filePaths]);
   await supabase.from("articles").delete().eq("id", article.id);
