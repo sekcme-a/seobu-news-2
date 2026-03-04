@@ -5,7 +5,7 @@ import KakaoButton from "./KakaoButton";
 const SocialLogin = () => {
   return (
     <div className="flex justify-center flex-wrap">
-      <p className="mt-5 w-full text-center text-sm">
+      <p className="mt-5 w-full text-center text-sm text-white">
         소셜로그인으로 간편하게 로그인하세요!
       </p>
 
