@@ -36,9 +36,10 @@ export default function AboutModern() {
 
               <div className="relative z-10">
                 <blockquote className="text-3xl font-serif italic mb-8 leading-snug">
-                  "언론의 가치는 <br />
+                  {` "언론의 가치는 `}
+                  <br />
                   타협하지 않는 <br />
-                  용기에서 나옵니다."
+                  {` 용기에서 나옵니다.`}
                 </blockquote>
                 <div className="space-y-1">
                   <p className="text-slate-400 text-sm tracking-widest uppercase">
@@ -76,7 +77,7 @@ export default function AboutModern() {
               </p>
 
               <p className="pl-6 border-l-2 border-slate-900 py-2 italic text-slate-800">
-                "서부뉴스은 그 질문에 대한 가장 정직한 해답이 되고자 합니다."
+                {`  "서부뉴스은 그 질문에 대한 가장 정직한 해답이 되고자 합니다."`}
               </p>
 
               <p>

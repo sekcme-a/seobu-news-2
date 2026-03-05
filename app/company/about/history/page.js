@@ -128,7 +128,7 @@ export default function HistorySection() {
         {/* 하단 엔딩 멘트 */}
         <div className="mt-40 text-center">
           <p className="text-slate-400 font-light italic mb-8">
-            History doesn't stop, it continues with you.
+            {`History doesn't stop, it continues with you.`}
           </p>
           <div className="inline-block p-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent w-full max-w-md"></div>
         </div>
