@@ -6,10 +6,10 @@ export default function PrivacyPolicy() {
       </h1>
       <div className="prose prose-lg max-w-none text-gray-700 leading-loose">
         <p className="mb-6">
-          (주)서부뉴스(이하 "회사")는 「개인정보 보호법」 등 관련 법령에 따라
+          {` (주)서부뉴스(이하 "회사")는 「개인정보 보호법」 등 관련 법령에 따라
           이용자의 개인정보를 보호하고, 이와 관련한 고충을 신속하고 원활하게
           처리할 수 있도록 하기 위하여 다음과 같이 개인정보 처리방침을
-          수립·공개합니다.
+          수립·공개합니다.`}
         </p>
 
         <h3 className="text-xl font-bold text-gray-900 mt-12 mb-4">
