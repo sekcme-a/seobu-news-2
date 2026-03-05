@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function ArticleThumbnail({ article }) {
   return (
-    <li className="py-5 md:py-8 border-b-[1px] border-[#9a9a9a]">
+    <article className="py-5 md:py-8 border-b-[1px] border-[#9a9a9a]">
       <Link href={`/article/${article.id}`} aria-label="기사로 이동">
         <article className="flex gap-x-4 md:gap-x-8 items-center">
           <div className="w-2/5 md:w-1/5 relative  h-24 rounded-lg overflow-hidden">
@@ -37,6 +37,6 @@ export default function ArticleThumbnail({ article }) {
           </div>
         </article>
       </Link>
-    </li>
+    </article>
   );
 }

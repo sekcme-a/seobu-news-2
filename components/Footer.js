@@ -6,21 +6,59 @@ const Footer = () => {
   const TEXT_STYLE =
     "text-[13px] text-gray-500 hover:text-gray-800 transition-colors";
 
+  // 상단 메뉴 스타일 (조금 더 강조된 폰트 크기)
+  const NAV_STYLE =
+    "text-[14px] text-gray-600 hover:text-black font-medium transition-colors";
+
   const FOOTER_ONE = [
     "주소 - 경기도 시흥시 장현동 671-5 시티프론트561 더파이브437호",
     "전화 - 031-311-8272",
     "발행인 - 심귀자",
-    "편집인 - 심귀자",
+    "편집인 - 김균식",
     "청소년보호책임자 - 심귀자",
+    "고충처리인 - 김균식",
+  ];
+
+  const FOOTER_NAV = [
+    { name: "회사소개", href: "company/about/intro" },
+    { name: "기사제보", href: "company/inquiry/report" },
+    { name: "광고문의", href: "company/inquiry/ad" },
+    { name: "제휴문의", href: "company/inquiry/partner" },
+    { name: "이용약관", href: "company/policy/terms" },
+    {
+      name: "개인정보처리방침",
+      href: "company/policy/privacy",
+      highlight: true,
+    },
+    { name: "청소년보호정책", href: "company/policy/youth" },
   ];
 
   const FOOTER_TWO = ["사업자명 - 서부뉴스", "사업자등록번호 - 710-81-02517"];
 
   return (
     <footer className="w-full bg-gray-50 mt-20 border-t border-gray-200">
-      <div className="max-w-[1280px] mx-auto px-4 py-12 lg:py-16">
+      {/* 1. 상단 정책 및 서비스 네비게이션 */}
+      <nav className="py-3 border-b border-gray-200">
+        <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+          {FOOTER_NAV.map((item, index) => (
+            <li key={index} className="flex items-center gap-6">
+              <Link
+                href={item.href}
+                className={`${NAV_STYLE} ${item.highlight ? "font-bold text-gray-900" : ""}`}
+              >
+                {item.name}
+              </Link>
+              {index !== FOOTER_NAV.length - 1 && (
+                <div className="hidden md:block w-[1px] h-3 bg-gray-300" />
+              )}
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <div className="max-w-[1280px] mx-auto px-4 py-12 lg:pb-16 lg:pt-8">
         {/* 상단 로고 및 정책 링크 영역 */}
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 pb-8 border-b border-gray-200 gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-center  pb-8  gap-6">
           <Image
             src="/images/logo.png" // 화이트 배경용 블랙 로고로 변경 권장
             alt="뉴스 로고"
