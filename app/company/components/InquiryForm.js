@@ -8,38 +8,64 @@ export default function InquiryForm({ category, categoryId }) {
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState([]); // 다중 파일 배열
+  const [isDragging, setIsDragging] = useState(false); // 드래그 상태 관리
 
   const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 전체 합계 20MB 제한
   const SUBMIT_DELAY = 60 * 1000; // 도배 방지 간격 (60초)
 
-  // 1. 파일 선택 및 용량 체크 핸들러
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-
-    // 현재 담긴 파일 + 새로 선택한 파일의 총 용량 계산
+  // 공통 파일 처리 로직 (용량 체크 및 상태 업데이트)
+  const processFiles = (newFiles) => {
     const currentTotalSize = files.reduce((acc, f) => acc + f.size, 0);
-    const newFilesSize = selectedFiles.reduce((acc, f) => acc + f.size, 0);
+    const newFilesSize = newFiles.reduce((acc, f) => acc + f.size, 0);
 
     if (currentTotalSize + newFilesSize > MAX_TOTAL_SIZE) {
       alert("전체 파일 크기는 20MB를 초과할 수 없습니다.");
-      e.target.value = "";
       return;
     }
 
-    setFiles((prev) => [...prev, ...selectedFiles]);
+    setFiles((prev) => [...prev, ...newFiles]);
+  };
+
+  // 1. 클릭하여 파일 선택 시 핸들러
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    processFiles(selectedFiles);
     e.target.value = ""; // 동일 파일 재선택이 가능하도록 입력창 초기화
   };
 
-  // 2. 파일 삭제 핸들러
+  // 2. 드래그 앤 드롭 핸들러
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const droppedFiles = Array.from(e.dataTransfer.files);
+    if (droppedFiles && droppedFiles.length > 0) {
+      processFiles(droppedFiles);
+    }
+  };
+
+  // 3. 파일 삭제 핸들러
   const removeFile = (index) => {
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 3. 폼 제출 핸들러
+  // 4. 폼 제출 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // [방해행위 방지] 마지막 제출 시간 체크
     const lastSubmit = localStorage.getItem(`last_submit_${categoryId}`);
     const now = Date.now();
     if (lastSubmit && now - parseInt(lastSubmit) < SUBMIT_DELAY) {
@@ -70,7 +96,6 @@ export default function InquiryForm({ category, categoryId }) {
 
       let fileUrls = [];
 
-      // A. 다중 파일 스토리지 업로드
       for (const file of files) {
         const fileExt = file.name.split(".").pop();
         const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
@@ -85,11 +110,9 @@ export default function InquiryForm({ category, categoryId }) {
         const {
           data: { publicUrl },
         } = supabase.storage.from("inquiry_files").getPublicUrl(filePath);
-
         fileUrls.push(publicUrl);
       }
 
-      // B. Database 저장 (배열 형태 저장)
       const { error: dbError } = await supabase.from("inquiries").insert([
         {
           category,
@@ -99,15 +122,13 @@ export default function InquiryForm({ category, categoryId }) {
           company,
           title,
           content,
-          file_urls: fileUrls, // DB에 jsonb 또는 text[] 타입 컬럼 권장
+          file_urls: fileUrls,
         },
       ]);
 
       if (dbError) throw dbError;
 
-      // 제출 성공 시 시간 기록 (도배 방지용)
       localStorage.setItem(`last_submit_${categoryId}`, Date.now().toString());
-
       alert(`[${category}] 접수가 성공적으로 완료되었습니다.`);
       window.location.reload();
     } catch (error) {
@@ -124,8 +145,8 @@ export default function InquiryForm({ category, categoryId }) {
       className="max-w-4xl mx-auto space-y-8 bg-white p-8 rounded-xl shadow-md border border-gray-200 mt-8"
     >
       {/* 개인정보 동의 영역 */}
-      <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-        <h3 className="text-lg font-bold text-gray-900 mb-3 text-left">
+      <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 text-left">
+        <h3 className="text-lg font-bold text-gray-900 mb-3">
           개인정보보호를 위한 이용자 동의사항
         </h3>
         <div className="h-32 overflow-y-auto bg-white p-4 border border-gray-200 text-sm text-gray-600 mb-4 leading-relaxed">
@@ -223,16 +244,26 @@ export default function InquiryForm({ category, categoryId }) {
         ></textarea>
       </div>
 
-      {/* 파일 첨부 영역 */}
+      {/* 파일 첨부 영역 (드래그 앤 드롭 적용) */}
       <div>
         <label className="block text-sm font-bold text-gray-700 mb-2 text-left">
           파일 첨부 (전체 최대 20MB)
         </label>
         <div className="flex items-center justify-center w-full mb-4">
-          <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+          <label
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200 
+              ${
+                isDragging
+                  ? "border-blue-500 bg-blue-50 scale-[1.01]"
+                  : "border-gray-300 bg-gray-50 hover:bg-gray-100"
+              }`}
+          >
             <div className="flex flex-col items-center justify-center pt-5 pb-6">
               <svg
-                className="w-8 h-8 mb-3 text-gray-400"
+                className={`w-8 h-8 mb-3 transition-colors ${isDragging ? "text-blue-500" : "text-gray-400"}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -242,10 +273,12 @@ export default function InquiryForm({ category, categoryId }) {
                   strokeLinejoin="round"
                   strokeWidth="2"
                   d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                ></path>
+                />
               </svg>
               <p className="mb-2 text-sm text-gray-500 font-semibold text-center">
-                클릭하거나 파일을 드래그하여 추가
+                {isDragging
+                  ? "여기에 파일을 놓으세요"
+                  : "클릭하거나 파일을 드래그하여 추가"}
               </p>
               <p className="text-xs text-gray-400">
                 PDF, JPG, PNG, DOCX, ZIP (총합 20MB 이내)
@@ -304,7 +337,6 @@ export default function InquiryForm({ category, categoryId }) {
         </button>
       </div>
 
-      {/* 내부 스타일 정의 */}
       <style jsx>{`
         .input-field {
           width: 100%;
