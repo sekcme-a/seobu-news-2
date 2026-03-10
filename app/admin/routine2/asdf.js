@@ -1,28 +1,39 @@
 import { createBrowserSupabaseClient } from "@/utils/supabase/client";
+
 import { Button } from "@mui/material";
+
 import { useRouter } from "next/navigation";
+
 import { useState } from "react";
 
 const IncheonRoom = ({ setRoomPage, posts, authors }) => {
   const supabase = createBrowserSupabaseClient();
+
   const router = useRouter();
+
   const [page, setPage] = useState(0);
 
   function cleanText(raw) {
     if (!raw) return "";
+
     let text = raw;
 
     // 1. "사진 확대보기"가 여러 번 있을 수 있으므로 반복 처리
+
     while (text.includes("사진 확대보기")) {
       const photoIndex = text.indexOf("사진 확대보기");
+
       if (photoIndex === -1) break;
 
       const before = text.slice(0, photoIndex);
+
       let after = text.slice(photoIndex + "사진 확대보기".length);
 
       const firstContentMatch = after.match(/[^\n\s]/); // 공백/줄바꿈이 아닌 첫 문자 찾기
+
       if (firstContentMatch) {
         const firstContentIndex = after.indexOf(firstContentMatch[0]);
+
         after = after.slice(firstContentIndex);
       }
 
@@ -30,82 +41,84 @@ const IncheonRoom = ({ setRoomPage, posts, authors }) => {
     }
 
     // 2. &nbsp; → 일반 공백
+
     text = text.replace(/&nbsp;/g, " ");
 
     // 3. 줄바꿈 3번 이상 → 2번으로
+
     text = text.replace(/\n{3,}/g, "\n\n");
 
     // 4. "줄바꿈 + 담당부서 + 줄바꿈" 이후는 삭제
+
     text = text.replace(/\n담당부서\n[\s\S]*/g, "");
+
     text = text.replace(/\n담당 부서 :[\s\S]*/g, "");
 
     return text.trim(); // 앞뒤 공백 제거
   }
 
   // 담당부서 문구 빼고 기자명 삽입
+
   const refineContent = () => {
     if (!posts || posts.length === 0) return "";
+
     const AUTHORS = authors;
+
     const randomNum = Math.floor(Math.random() * AUTHORS.length);
 
     console.log(posts[page]?.content);
+
     console.log(cleanText(posts[page]?.content));
+
     return cleanText(posts[page]?.content) + `\n\n${AUTHORS[randomNum]}`;
   };
 
   /**
-   * ✅ 이미지 강제 다운로드 핸들러
-   */
-  /**
-   * ✅ 이미지 강제 다운로드 핸들러 (실패 시 로고로 대체)
-   */
-  /**
-   * ✅ CORS를 우회하여 이미지 다운로드 (API Route 활용)
-   */
-  const handleImageDownload = async () => {
-    const originalUrl = posts[page]?.attachments[0];
-    const DEFAULT_IMAGE = "/images/incheon_logo.png";
 
-    // 1. 기초적인 더미 패턴 체크
-    if (!originalUrl || originalUrl.includes("getImage?srvcId=ReportData")) {
-      downloadFile(DEFAULT_IMAGE, "incheon_logo.png");
-      return;
-    }
+* ✅ 이미지 강제 다운로드 핸들러
+
+*/
+
+  const handleImageDownload = async () => {
+    const imageUrl = posts[page]?.attachments[0];
+
+    if (!imageUrl) return;
 
     try {
-      const proxyUrl = `/api/download/check-url?url=${encodeURIComponent(originalUrl)}`;
-      const response = await fetch(proxyUrl);
+      const response = await fetch(imageUrl);
 
-      // ✅ 2. 서버에서 400 에러 등을 보내면 catch 블록으로 이동시킴
-      if (!response.ok) {
-        throw new Error("Invalid response from proxy");
-      }
-
-      // 실제 이미지 바이너리 데이터 가져오기
       const blob = await response.blob();
 
-      // ✅ 3. 브라우저 단에서도 한 번 더 크기 체크 (혹시 모를 0kb 방지)
-      if (blob.size < 500) {
-        throw new Error("File too small");
-      }
-
       const url = window.URL.createObjectURL(blob);
-      const fileName = `incheon_news_${posts[page]?.number || "img"}.jpg`;
-      downloadFile(url, fileName);
+
+      const link = document.createElement("a");
+
+      const fileName = imageUrl.includes("logo.png")
+        ? "logo.png"
+        : `incheon_news_${posts[page]?.number || "img"}.jpg`;
+
+      link.href = url;
+
+      link.setAttribute("download", fileName);
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.warn("다운로드 실패 혹은 더미 링크입니다. 로고로 대체합니다.");
-      downloadFile(DEFAULT_IMAGE, "incheon_logo.png");
-    }
-  };
+      console.error("다운로드 실패:", error);
 
-  const downloadFile = (url, fileName) => {
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+      const link = document.createElement("a");
+
+      link.href = imageUrl;
+
+      link.download = "incheon_image.jpg";
+
+      link.click();
+    }
   };
 
   return (
@@ -122,6 +135,7 @@ const IncheonRoom = ({ setRoomPage, posts, authors }) => {
       >
         제목 붙혀넣기
       </Button>
+
       <Button
         variant="contained"
         fullWidth
@@ -132,6 +146,7 @@ const IncheonRoom = ({ setRoomPage, posts, authors }) => {
       >
         내용 일부분 붙혀넣기
       </Button>
+
       <Button
         variant="contained"
         fullWidth
@@ -140,6 +155,7 @@ const IncheonRoom = ({ setRoomPage, posts, authors }) => {
       >
         내용 붙혀넣기
       </Button>
+
       <Button
         variant="contained"
         fullWidth
@@ -148,6 +164,7 @@ const IncheonRoom = ({ setRoomPage, posts, authors }) => {
       >
         이미지 다운로드
       </Button>
+
       <Button
         variant="contained"
         fullWidth
@@ -156,6 +173,7 @@ const IncheonRoom = ({ setRoomPage, posts, authors }) => {
       >
         다음 페이지
       </Button>
+
       <Button
         variant="contained"
         fullWidth
@@ -164,17 +182,22 @@ const IncheonRoom = ({ setRoomPage, posts, authors }) => {
       >
         전 페이지
       </Button>
+
       <Button
         variant="contained"
         fullWidth
         style={{ height: "15vh", marginBottom: "2vh", marginTop: "5vh" }}
         onClick={async () => {
           await supabase
+
             .from("routine2")
+
             .upsert(
               { type: "incheon", date: new Date() },
+
               { onConflict: "type" },
             );
+
           setRoomPage((prev) => prev + 1);
         }}
       >
