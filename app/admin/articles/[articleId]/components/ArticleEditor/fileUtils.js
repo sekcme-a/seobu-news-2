@@ -13,6 +13,7 @@ export const handleFileUpload = async ({
   files,
   prevFiles,
   prevImages,
+  imagesBodo, // 추가됨
 }) => {
   let realArticleId = articleId;
 
@@ -70,15 +71,20 @@ export const handleFileUpload = async ({
   const unusedFiles = prevPaths.filter((path) => !currentPaths.includes(path));
   if (unusedFiles.length) await deleteFiles(unusedFiles);
 
-  // Supabase 업데이트
+  // 썸네일 결정 로직: 본문 이미지 우선, 없으면 imagesBodo[0]
   const regex = /<img\s+[^>]*?src=["']([^"']+)["'][^>]*?>/i;
   const match = html.match(regex);
+  const thumbnail =
+    match?.[1] || (imagesBodo && imagesBodo.length > 0 ? imagesBodo[0] : null);
+
+  // Supabase 업데이트
   const updatePayload = {
     title,
     author,
     content: html,
-    thumbnail_image: match?.[1] ?? null,
+    thumbnail_image: thumbnail, // 결정된 썸네일 사용
     files: finalFiles,
+    images_bodo: imagesBodo, // 수정된 images_bodo 저장
   };
 
   const { error } = await supabase
@@ -91,8 +97,47 @@ export const handleFileUpload = async ({
 };
 
 export const handleFileDelete = async ({ supabase, article }) => {
-  const images = extractImagePathsFromHtml(JSON.stringify(article));
-  const filePaths = article.files?.map((f) => f.path) || [];
-  await deleteFiles([...images, ...filePaths]);
-  await supabase.from("articles").delete().eq("id", article.id);
+  const articleId = article.id;
+  if (!articleId) return;
+
+  try {
+    const bucketName = "public-bucket";
+    // 실제 파일들이 저장된 상위 경로를 포함해야 합니다.
+    const folderPath = `admin/images/${articleId}`;
+
+    // 1. 해당 폴더 내의 파일 목록 가져오기
+    const { data: list, error: listError } = await supabase.storage
+      .from(bucketName)
+      .list(folderPath); // 경로 수정
+
+    console.log("조회된 파일 목록:", list);
+
+    if (listError) {
+      console.error("목록 조회 실패:", listError);
+    } else if (list && list.length > 0) {
+      // 2. 삭제 시에도 '상위경로/파일명' 형태의 전체 경로 배열이 필요합니다.
+      const filesToRemove = list.map((f) => `${folderPath}/${f.name}`);
+
+      const { data: removedData, error: removeError } = await supabase.storage
+        .from(bucketName)
+        .remove(filesToRemove);
+
+      if (removeError) {
+        console.error("Storage 파일 삭제 실패:", removeError);
+      } else {
+        console.log("Storage 삭제 성공:", removedData);
+      }
+    }
+
+    // 3. DB 레코드 삭제
+    const { error: dbError } = await supabase
+      .from("articles")
+      .delete()
+      .eq("id", articleId);
+
+    if (dbError) throw dbError;
+  } catch (err) {
+    console.error("기사 삭제 중 오류 발생:", err);
+    throw err;
+  }
 };

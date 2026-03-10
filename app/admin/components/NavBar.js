@@ -62,7 +62,7 @@ const NavBar = () => {
       .eq("user_id", user.id)
       .single();
 
-    console.log(data);
+    // console.log(data);
     setUserRole(data.role);
   };
 
