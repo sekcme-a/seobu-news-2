@@ -1,22 +1,40 @@
 import { createServerSupabaseClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import AdBanner from "../AdBanner";
+import YoutubeSlider from "../YoutubeSlider";
 
 export default async function RecentArticles() {
   const supabase = await createServerSupabaseClient();
 
-  const { data: adData } = await supabase
-    .from("advertisements")
-    .select("image_url, target_url, ad_type")
-    .eq("ad_type", "main_top_right")
-    .maybeSingle();
+  // 1. 광고 데이터와 유튜브 데이터를 병렬로 가져옵니다.
+  const [adRes, ytRes] = await Promise.all([
+    supabase
+      .from("advertisements")
+      .select("image_url, target_url, ad_type")
+      .eq("ad_type", "main_top_right")
+      .maybeSingle(),
+    supabase
+      .from("youtube_links")
+      .select("*")
+      .order("sort_order", { ascending: true }),
+  ]);
+
+  const adData = adRes.data;
+  const youtubeLinks = ytRes.data || [];
+  const hasYoutube = youtubeLinks.length > 0;
 
   try {
+    // 2. 유튜브가 있으면 2개, 광고가 있으면 2개씩 줄여서 limit을 계산합니다.
+    // 기본 8개 -> (유튜브 있으면 6개) -> (광고까지 있으면 4개)
+    let articleLimit = 8;
+    if (hasYoutube) articleLimit -= 2;
+    if (adData) articleLimit -= 2;
+
     const { data: recentArticles, error } = await supabase
       .from("articles")
       .select("id, title, created_at")
       .order("created_at", { ascending: false })
-      .limit(adData ? 6 : 8);
+      .limit(articleLimit);
 
     if (error) throw error;
 
@@ -38,6 +56,10 @@ export default async function RecentArticles() {
             </li>
           ))}
         </ul>
+
+        {/* 3. 가져온 데이터를 prop으로 전달합니다. */}
+        {hasYoutube && <YoutubeSlider initialLinks={youtubeLinks} />}
+
         {adData && (
           <div className="mt-2 p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
             <AdBanner data={adData} />
