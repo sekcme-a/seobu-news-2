@@ -7,6 +7,7 @@ import {
   fmt,
   withDetail,
 } from "./lib/electricityCalc";
+import Link from "next/link";
 
 // 세부 항목 표시 순서
 const DETAIL_FIELDS = [
@@ -258,12 +259,12 @@ export default function ElectricityPage() {
           }}
         >
           ⚠️ 요금 설정이 없습니다. 먼저{" "}
-          <a
+          <Link
             href="/manage/electricity/settings"
             style={{ color: "var(--accent)", textDecoration: "underline" }}
           >
             요금 설정
-          </a>{" "}
+          </Link>{" "}
           페이지에서 단가를 입력해주세요.
         </div>
       )}
