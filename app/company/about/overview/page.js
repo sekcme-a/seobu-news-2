@@ -164,7 +164,7 @@ export default function AboutOverview() {
 //               <p className="text-2xl font-normal text-slate-950 leading-snug">
 //                 안녕하십니까, <br className="md:hidden" />
 //                 <span className="font-bold text-blue-700">투데이태백</span>{" "}
-//                 대표이사 <span className="font-bold">김균식</span>입니다.
+//                 대표이사 <span className="font-bold">심귀자</span>입니다.
 //               </p>
 
 //               <p>
@@ -199,7 +199,7 @@ export default function AboutOverview() {
 //                   Truth & Transparency Media Group
 //                 </p>
 //                 <p className="text-2xl font-serif tracking-[0.2em] text-slate-950">
-//                   김균식
+//                   심귀자
 //                 </p>
 //               </div>
 //             </div>
