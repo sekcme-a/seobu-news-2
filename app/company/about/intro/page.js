@@ -66,7 +66,7 @@ export default function AboutModern() {
               <p>
                 안녕하십니까,{" "}
                 <span className="text-slate-900 font-bold">서부뉴스</span>{" "}
-                대표이사 김균식입니다.
+                대표이사 심귀자입니다.
               </p>
 
               <p>
@@ -105,7 +105,7 @@ export default function AboutModern() {
                     Signature
                   </p>
                   <p className="text-2xl font-serif tracking-[0.3em] text-slate-900">
-                    김균식
+                    심귀자
                   </p>
                 </div>
               </div>
