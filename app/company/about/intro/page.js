@@ -46,7 +46,7 @@ export default function AboutModern() {
                     CEO / Publisher
                   </p>
                   <p className="text-4xl font-light tracking-tighter">
-                    Kim Kyun Sik
+                    Sim Gwi Ja
                   </p>
                 </div>
               </div>
