@@ -66,9 +66,6 @@ export default function PdfViewer() {
               >
                 <div>
                   <p className="font-medium">{paper.title}</p>
-                  <p className="text-xs opacity-50 mt-1">
-                    {paper.published_date}
-                  </p>
                 </div>
                 <span className="md:hidden text-gray-400">→</span>
               </div>
